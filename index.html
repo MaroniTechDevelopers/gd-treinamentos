@@ -216,7 +216,12 @@ hr{border:none;border-top:1px solid #f3f4f6;margin:14px 0}
 // ════════════════════════════════════════
 const DB_KEY  = 'gd_treinamentos_v3';
 const CFG_KEY = 'gd_config_v1';
-function cfg(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); }catch(e){ return {}; } }
+const _DEFAULT_CFG = {
+  presencaEndpoint: 'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/af9c58dedff346e0b25544328cc3e307/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=G4ZUzAnQjrXwIDQxlYleyZ-XdslwIrWaC68IFUjXNY8',
+  outlookEndpoint:  'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2885f399a9074c1b9dae4b002b7be2c5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZbGtKIoeMOfPwd7KtD-OtvuP2aN7Ls_iBX5Rrk4IwgA',
+  notionEndpoint:   'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a83dde8e173b44408529c8b633301dcf/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=VPCWLe_N2U2JZqb9A4pjGzlu6Ddw-G-6lZoi9Wt8AF0'
+};
+function cfg(){ try{ const s=JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); return {..._DEFAULT_CFG,...s}; }catch(e){ return {..._DEFAULT_CFG}; } }
 function saveCfg(c){ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
 
 function db(){
