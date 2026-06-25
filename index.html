@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>Treinamentos G&D — Grupo Maroni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Segoe UI',Arial,sans-serif;background:#f0f2f5;min-height:100vh;color:#111827;-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ── */
+.page{max-width:880px;margin:0 auto;padding:0 16px 80px}
+
+/* ── APP BAR ── */
+.app-bar{background:#111827;height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(245,200,0,.15)}
+.app-bar-left{display:flex;align-items:center;gap:10px}
+.app-bar-title{font-size:.88rem;font-weight:700;color:#f5c800;letter-spacing:.01em}
+.app-bar-user{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:5px 12px;border-radius:20px;font-size:.78rem;color:#fff;cursor:pointer;transition:background .15s}
+.app-bar-user:hover{background:rgba(255,255,255,.14)}
+.av{width:28px;height:28px;border-radius:50%;background:#f5c800;color:#111827;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:800;flex-shrink:0}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04)}
+.card-title{font-size:.93rem;font-weight:700;margin-bottom:16px;color:#111827}
+
+/* ── BOTÕES ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;border-radius:9px;border:none;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s;text-decoration:none;white-space:nowrap;letter-spacing:.01em;font-family:inherit}
+.btn-yellow{background:#f5c800;color:#111827}
+.btn-yellow:hover{background:#e6ba00;box-shadow:0 2px 8px rgba(245,200,0,.35)}
+.btn-dark{background:#111827;color:#fff}
+.btn-dark:hover{background:#1f2937}
+.btn-outline{background:#fff;color:#374151;border:1.5px solid #e5e7eb}
+.btn-outline:hover{background:#f9fafb;border-color:#d1d5db}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-danger:hover{background:#b91c1c}
+.btn-sm{padding:7px 13px;font-size:.77rem}
+.btn-lg{padding:14px 24px;font-size:.95rem;font-weight:700}
+.btn-full{width:100%}
+.btn:disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+/* ── FORMS ── */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:.72rem;font-weight:600;color:#6b7280;margin-bottom:5px;letter-spacing:.01em}
+.fc{width:100%;padding:11px 13px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:.9rem;background:#f9fafb;transition:border-color .2s,background .2s,box-shadow .2s;color:#111827;font-family:inherit}
+.fc:focus{outline:none;border-color:#f5c800;background:#fff;box-shadow:0 0 0 3px rgba(245,200,0,.15)}
+.fc-err{border-color:#dc2626!important}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.f-row{grid-template-columns:1fr}}
+.field-error{color:#dc2626;font-size:.71rem;margin-top:3px;display:none}
+.field-error.show{display:block}
+
+/* ── BADGES ── */
+.badge{display:inline-block;padding:4px 11px;border-radius:99px;font-size:.67rem;font-weight:700;letter-spacing:.02em}
+.badge-agendado{background:#dbeafe;color:#1e40af}
+.badge-andamento{background:#fef3c7;color:#92400e}
+.badge-encerrado{background:#d1fae5;color:#065f46}
+.badge-cancelado{background:#fee2e2;color:#991b1b}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stats-row-4{grid-template-columns:repeat(4,1fr)}
+.stats-row-5{grid-template-columns:repeat(5,1fr)}
+@media(max-width:480px){.stats-row-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.stats-row-5{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:400px){.stats-row-5{grid-template-columns:repeat(2,1fr)}}
+.app-bar-back{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:8px;padding:5px 13px;cursor:pointer;font-size:.8rem;font-weight:700;letter-spacing:.02em;transition:background .15s;font-family:inherit;line-height:1}
+.app-bar-back:hover{background:rgba(255,255,255,.22)}
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.filter-bar input,.filter-bar select{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:.82rem;background:#fff;color:#111827;font-family:inherit;flex:1;min-width:150px}
+.filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:#f5c800;box-shadow:0 0 0 3px rgba(245,200,0,.15)}
+.status-bar-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.status-bar-pill{font-size:.73rem;font-weight:600;padding:5px 12px;border-radius:20px;cursor:pointer;transition:opacity .15s;border:none;font-family:inherit}
+.status-bar-pill:hover{opacity:.75}
+.stat-box{background:#fff;border-radius:13px;padding:16px 12px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04);text-align:center}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;font-size:1rem}
+.stat-num{font-size:1.75rem;font-weight:800;line-height:1}
+.stat-lbl{font-size:.65rem;font-weight:600;color:#9ca3af;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+
+/* ── LISTA DE TREINAMENTOS ── */
+.t-item{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 0 0 1px rgba(0,0,0,.04);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .12s,box-shadow .15s;border-left:3px solid #e5e7eb}
+.t-item:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.09),0 0 0 1px rgba(0,0,0,.04)}
+.t-item[data-status="agendado"]{border-left-color:#3b82f6}
+.t-item[data-status="andamento"]{border-left-color:#f5c800}
+.t-item[data-status="encerrado"]{border-left-color:#10b981}
+.t-item[data-status="cancelado"]{border-left-color:#ef4444}
+.t-date{background:#111827;color:#f5c800;border-radius:9px;padding:8px 10px;text-align:center;flex-shrink:0;min-width:48px}
+.t-date-d{font-size:1.35rem;font-weight:800;line-height:1}
+.t-date-m{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em}
+.t-info{flex:1;min-width:0}
+.t-titulo{font-weight:700;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#111827}
+.t-meta{font-size:.73rem;color:#9ca3af;margin-top:2px}
+.t-cnt{text-align:right;flex-shrink:0;font-size:1.15rem;font-weight:800;color:#111827}
+.t-cnt small{display:block;font-size:.62rem;color:#d1d5db;font-weight:500}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px}
+.sec-hdr h2{font-size:.88rem;font-weight:700;color:#374151}
+
+/* ── LOGIN ── */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#f0f2f5 0%,#e8eaed 100%)}
+.login-card{background:#fff;border-radius:18px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.05);overflow:hidden}
+.login-card-header{background:#f5c800;padding:22px 24px 20px}
+.login-card-body{padding:22px 24px 26px}
+.g-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;cursor:pointer;transition:background .15s;margin-bottom:5px;border:1.5px solid transparent}
+.g-item:hover{background:#fffbeb;border-color:#f5c800}
+.g-av{width:38px;height:38px;border-radius:50%;background:#111827;color:#f5c800;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0}
+.g-nome{font-weight:700;font-size:.87rem;color:#111827}
+.g-sub{font-size:.71rem;color:#9ca3af}
+
+/* ── QR ── */
+.qr-wrap{display:flex;flex-direction:column;align-items:center;padding:18px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.04);margin-bottom:14px}
+#qrcode canvas,#qrcode img{border-radius:6px}
+.qr-url{font-size:.65rem;color:#d1d5db;word-break:break-all;text-align:center;max-width:240px;margin-top:6px}
+
+/* ── TABELA PRESENÇA ── */
+.p-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.p-table th{background:#111827;color:#f5c800;padding:10px 12px;text-align:left;font-weight:600;white-space:nowrap;font-size:.73rem;letter-spacing:.04em}
+.p-table td{padding:10px 12px;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+.p-table tr:last-child td{border-bottom:none}
+.p-table tr:hover td{background:#f9fafb}
+.assin-img{width:72px;height:28px;object-fit:contain;cursor:zoom-in;border:1px solid #e5e7eb;border-radius:4px}
+
+/* ── ATA ── */
+.ata-info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.ata-info-box{background:#f9fafb;border-radius:10px;padding:12px 14px;border:1px solid #f3f4f6}
+.ata-info-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#9ca3af;margin-bottom:3px}
+.ata-info-val{font-size:.88rem;font-weight:700;color:#111827}
+@media(max-width:480px){.ata-info-grid{grid-template-columns:1fr 1fr}}
+.assin-linha{border-bottom:1.5px solid #374151;height:44px;margin-bottom:5px}
+
+/* ── FORM INSCRICAO ── */
+.ins-header{background:#111827;padding:14px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ins-wrap{max-width:520px;margin:0 auto;padding:16px}
+.evento-card{background:#111827;color:#fff;border-radius:14px;padding:18px;margin-bottom:14px}
+.ev-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:.09em;color:#f5c800;font-weight:700;margin-bottom:1px}
+.ev-val{font-size:.88rem;font-weight:600;margin-bottom:9px}
+.ev-val:last-child{margin-bottom:0}
+.ev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:12px;margin-top:6px}
+
+/* Canvas assinatura */
+.canvas-wrap{border:1.5px solid #e5e7eb;border-radius:10px;background:#fafafa;overflow:hidden;position:relative;touch-action:none}
+canvas{display:block;width:100%;height:130px;cursor:crosshair}
+.canvas-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#d1d5db;font-size:.8rem}
+.btn-clear{background:none;border:none;color:#9ca3af;font-size:.72rem;cursor:pointer;padding:3px 0;text-decoration:underline}
+
+/* Telas estado */
+.tela{display:none;text-align:center;padding:48px 20px}
+.tela.ativa{display:block}
+.tela-icone{font-size:3.5rem;margin-bottom:14px}
+.tela h2{font-size:1.15rem;font-weight:800;margin-bottom:8px}
+.tela p{font-size:.87rem;color:#6b7280;line-height:1.6}
+.tela-ok h2{color:#059669}
+.tela-err h2{color:#dc2626}
+.spinner{border:3px solid #e5e7eb;border-top-color:#f5c800;border-radius:50%;width:34px;height:34px;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── PILLS ── */
+.pill{display:inline-flex;align-items:center;gap:5px;background:#f3f4f6;border-radius:99px;padding:4px 11px;font-size:.73rem;color:#4b5563;margin:2px 4px 2px 0;font-weight:500}
+
+/* ── MODAL ── */
+.m-back{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px;backdrop-filter:blur(3px)}
+.m-box{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+.m-box h3{font-size:.96rem;font-weight:700;margin-bottom:14px;color:#111827}
+.m-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:48px 20px;color:#9ca3af}
+.empty-ico{font-size:3rem;margin-bottom:10px}
+.empty h3{font-size:.9rem;color:#6b7280;margin-bottom:6px;font-weight:700}
+.empty p{font-size:.82rem}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:12px 18px;border-radius:12px;font-size:.83rem;font-weight:500;opacity:0;transform:translateY(8px);transition:all .28s;z-index:999;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+#toast.show{opacity:1;transform:none}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:#f5c800;color:#111827;border:none;font-size:1.5rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(245,200,0,.45);display:flex;align-items:center;justify-content:center;z-index:90;transition:all .15s}
+.fab:hover{transform:scale(1.08);box-shadow:0 6px 22px rgba(245,200,0,.55)}
+
+/* ── UTILS ── */
+hr{border:none;border-top:1px solid #f3f4f6;margin:14px 0}
+.mt-3{margin-top:12px}
+.mt-4{margin-top:16px}
+.mb-0{margin-bottom:0}
+.sep{display:flex;align-items:center;gap:10px;color:#d1d5db;font-size:.75rem;margin:14px 0}
+.sep::before,.sep::after{content:'';flex:1;border-top:1px solid #f3f4f6}
+.flex{display:flex}
+.gap-2{gap:8px}
+.wrap{flex-wrap:wrap}
+.items-center{align-items:center}
+.justify-between{justify-content:space-between}
+.text-muted{color:#9ca3af}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff}
+  .card{box-shadow:none;border:1px solid #e5e7eb}
+  .app-bar{display:none}
+  .fab{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+<div id="toast"></div>
+<div id="modals"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ════════════════════════════════════════
+//  BANCO DE DADOS (localStorage)
+// ════════════════════════════════════════
+const DB_KEY  = 'gd_treinamentos_v3';
+const CFG_KEY = 'gd_config_v1';
+function cfg(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); }catch(e){ return {}; } }
+function saveCfg(c){ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
+
+function db(){
+  try{ return JSON.parse(localStorage.getItem(DB_KEY)||'null') || {gestores:[],treinamentos:[],presencas:[],atas:[]}; }
+  catch(e){ return {gestores:[],treinamentos:[],presencas:[],atas:[]}; }
+}
+function dbEnsure(d){ if(!d.atas) d.atas=[]; return d; }
+
+function saveDb(d){ localStorage.setItem(DB_KEY, JSON.stringify(d)); }
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).substr(2,6); }
+
+function fmtData(s){
+  if(!s) return '—';
+  const [y,m,d]=s.split('-'); return `${d}/${m}/${y}`;
+}
+
+function fmtDataCurta(s){
+  if(!s) return {dia:'—',mes:''};
+  const meses=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const [y,m,d]=s.split('-');
+  return {dia:d, mes:meses[parseInt(m,10)-1]||'', ano:y};
+}
+
+function iniciais(n){
+  if(!n) return '?';
+  const p=n.trim().split(' ');
+  return p.length===1 ? p[0][0].toUpperCase() : (p[0][0]+p[p.length-1][0]).toUpperCase();
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function statusLabel(s){
+  return {agendado:'Agendado',andamento:'Em andamento',encerrado:'Encerrado',cancelado:'Cancelado'}[s||'agendado']||'Agendado';
+}
+
+// ════════════════════════════════════════
+//  LOGO
+// ════════════════════════════════════════
+const _LOGO_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADcAAAA7CAYAAADfGRI9AAADxUlEQVR42u3abYgUdRzA8d9sd212HgV5RRrVFcZpDxpkUeBhLzToisI6RAkCPZKIK4IMi4gKzvJ60VUvghKE6AGl7IJ60dWBcVmClYJ6Hp6Ij6d4x6msck+6P78v5mD5cbe7/nfmZubYF59ll2Fm98vu/Oc/syPDZ+oFzQm3GGKNP9GEayvHJVTRcSdwZ8y95Bp3BBJzz5bjynHxU44rxwXgmuka9xR2Tbe4BeiEYnC6xM3GZmRzt5n0uCq8j4tQoyepcSmsQd8kUYo9SY1bBjUG8CTWQtGV1DgP+6G+P3EbBM9D0QlxdDOWRhLnWw1FBtUQXz0U7Y5hj+EkdkUZV4sxKFogvvlQ9OJVLEENpAivYRTqmzfVcTPwrhkhR1AHwS1QWP3Yjs/wgpnBzMQWqLFhquI8rMQxKKzfIaiAFmE3HsE8dENhHUUq7LiH8Te0gEYIBosMzGIImseisOLm4GtokY6jCgehJTiFjagL/Gdp96urtBH/OKw3hm14GhVhHOc8rMBRqKMxh2+uHzVhHsQfwl/QiCwtEHcDFuaYY5ancddEcRlkoRHqsEH2gxeI/wp3x/mK8wIIrDYsgUxiDRQ3xjnu+zz72kIIrEUYxgV4woMXk5iJrIf4bscgdJKf5aycwW/H+ICSiklIvsBKc0iZBXsB6g+o7/OkxCl2mtfXmriPzPLVSYrLNWzClkONByFR7HN70YxPoA76Ib46ZMzyEVRGFXceaQhaHNY/AkE1uqHG/3aGcmmKA9chBQ+HHNZ/Cz9AYW0ycSXN3HdAHXRjLX6CBugVG/cz1EEW92A0JoON4lEb9zbUwQAErTEJu4wqG1cPdXAQgpnogUasG2LjKnDOYWMXUQfB/RiKOO5bGzducwnHrRkQNEUc98ZkcYuhjjZBfN9EGNds43L9C3W0Mgb736f54hqgjjKYC8GteA/HoQH5D+3QPH61cVYH1NEeXGdORRrQHsAsqBVi5pJWb6G42vENOOpDC+wJ5Wy8g8OlBBa4GncJlTbOWgUtURYdaDTnXyksw48hzGxGcZOJm9CH0ICcQSvmwv739iYOhT1aWh6+gAZsO1Yhbd7rcXyHEaiDLRAbVyhwAzQEA2jDfNgLPV9Cr0IPqouNs1YgAw1JF17E9ebmnNNFTgHvgzjF+e7AL9AQncXL8CCowbaciD4cwE78hq1YDnGNs57B7pDievEcxKiAFOAcZ3l+ZGdA/yvsQxMqIUEJYiO1WIcujEGLNISteAIeBBK3uFxp3IsGNGE9WvAxPsDraMQDSId9X+YVeZsPNYw7FOMAAAAASUVORK5CYII=';
+
+const LOGO = (bg='#1a1a1a', fg='white', h='36px') =>
+  `<img src="${_LOGO_SRC}" style="height:${h};display:block" alt="Grupo Maroni"/>`;
+
+const LOGO_FULL = (h='42px') =>
+  `<div style="display:flex;align-items:center;gap:11px">
+    <img src="${_LOGO_SRC}" style="height:${h};display:block" alt="Grupo Maroni"/>
+    <div style="line-height:1.1">
+      <div style="font-family:Inter,'Arial Black',Arial,sans-serif;font-weight:800;font-size:13px;letter-spacing:3px;color:#111827;text-transform:uppercase">GRUPO</div>
+      <div style="font-family:Inter,'Arial Black',Arial,sans-serif;font-weight:900;font-size:24px;color:#111827;letter-spacing:1px">MARONI</div>
+    </div>
+  </div>`;
+
+const _LOGO_FULL_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAAA+CAYAAABwWmQpAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA4NpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDYuMC1jMDAyIDc5LjE2NDQ2MCwgMjAyMC8wNS8xMi0xNjowNDoxNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo2MWRhMGQxMC0zYjQ4LTQ3YjktOTlmZi0zMDE2MjRkZmU4ZjAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6REY5MjgxRkEwQ0Q5MTFFQzhBQjVFMTI3OEI2MDJFOEMiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6REY5MjgxRjkwQ0Q5MTFFQzhBQjVFMTI3OEI2MDJFOEMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDIxLjIgKE1hY2ludG9zaCkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo5ZDg3YTgxOS02NDY1LTQ1YjctYTUzMi1hMTAxYTE4M2FjNzciIHN0UmVmOmRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDpkYTU1ZmFiMi04YjI1LTUyNGUtYWQ0OC04NzBkY2U4MzRhYTIiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5gDXkRAAAO+0lEQVR42uxdC3BWxRU+BIhJGiAB5CWPgGAdAaulCqWogONop4hisaKiIi1WO9RqZWi1gNYWBUWkFG3HgYrIs8UWkQqItAgKCOU1QlEB5VGQl0B4hVeS7hnOnSyb3b27e/dPfsh+M2cg97F79979ds9r9wcAWMuk9AIQbEdAgBdkhFcQEBCIERAQiBEQ4JMY3ZhUOw+kW/h8AWHGCAgIxAgIqFzUCK+g3EBRj0k2k31MiqpAmy9iUp/JaSZfMykO3SAQI3oHdzN5gElnIkWEjUymMhnL5DB3vCmTDzVlHmXyPyaLmYxnspc79xhJhD5MlkvK6M1kFPf3ICpzuqbeY0y+ZDKPyev0twy5TB5hci+T9pzmgAPBUnrmvzIpqcodQwzwdT1PnrsrJA/wtWDyH4gPHmKHvJa7rwDMA49HmNzJ3fuM4fvuJ1zXT9Jmnexgco2k3BuY7DS4fwmTJsHGqHpoRB+/g3D8FKlRPC5hMp9JK4d6cmmUv76C24ez2lxqJz+YLJB0+EJqN48u9H4aBGJULbzKpJkwc15HqlQDmk2mcefzSKWSAa/LJ7mYSScm7wjveUQK2vAUV29DJt2ZrObO1+PUtjx6zprc+Qk0++VRuzvTDBqhFalVQZVKgSqFI+bvmFyZRqpUO+HeT5nUkVyH8ZI5wrXNJKrURIXtskW4ro5nVeoxyX1NyICOromIMky49wVFvTl0D39tpzBj+EN1JgOYbGYyJM1mp97C30+SOiECO8WzTLZx0t6wjjPC6A00sqcau8iGiFCX/r2fO4aq4tOK+48z+YVw7P7glfKDm8mj0k7QY9MF3+H+f4K8OCqsoBkCBOPbZGC4Sjh2sALa1oRsoggHSM26lDs2C/SuaPS47ebsk+8FYiQDjqYvEjFEnE6jdvMdZ7ukk6Be3VpxL6pNi4RjmaSnR+pXC9L/WwudzffgkM3Vm0kD0Shhdl4g2FKIz2PKxZlyI0eMFoEY7h4eVDn600gpw9E0anc17v9FihnlW4p7F0mO3U2iAg4KgxI8owrPkaiAAbuXobw37bhB2SersGPGi97fi8kmsid4UmDQ6mHLj1FRKFTMHqkABvd6MvmY/hbdolkalSgJMPbyfVKJ9grnmhvcz88yhwIx7PEFnPU88RgJZ12fa7hjpxLWU9Nju9dz/68v2EJAz57PybaY8k4T2QolA8BYwYYR1SnVzNTFoB0HBccAtuufTAYyuZzJSroOo+F85P4HMeWi6tSW+3t1VZw1fLhr34OyKC9vX7Sk40l060zqXM8Lx7uCu7u2h3DvVM21nYVrnwG9u7YxqWfRuUOcZwhxk3DvRmqjSIoScHPXqjBJuLen5trXhGvvDcRwI0b0sUsEj08uHd/n+GwYvV0KZSkOGZ6IUZ3UP7HDizbXt6leG2IgRgjn+ZynPJo9+fP/IrUH005+SZ6kUs/EQMfIGe7eQomTpAbZinwdWyTEDcQwQG1SnaL7PxY68Ek6vpM8JC+Tkd6J7lXhRtKN+Wfr5okYEZmLhTJQHcHku1fgbAJgiaSDmhCjLs0U0fkiQa+fBPabPSQlBuJpSbkryAs3hdrPn0MCXw9VFK7EyCCDe4/kZfNGd1zC2lbyrORw3pinJJ22lDqtL2IgfiKMoipZZkkMxBDNszch41hX56oUEAPf7UuGRERb6YdV2TPlQoyuoN925wAZtYh1hh8CCXIXk9mgz1TN8UgMBGag/ltR334mD5ExakuMXGHGKxGM/OZkHIt1niF7Kk+YsXwQI8ItoM4qxgHp70zaVGVS2MYxWpG+3Cvmunz6uAMs7AvsfNNjrtlDBv0Gj+9gJalo6J7sCGfdtyfI27YIygKTUZs/pQ7Pv4PtknKPkg7PB8eKhXs6Ume/mrxuO0jd3Mt5jy7iPEPHhXo/cWzzPJI2ZEc1JkJuI5vuawgwmjFqUUc/aaETl9CHnw7JNlLDxTZvkK5bzbMqFRDgNGNk0BSONkBDB332VSjzpdtiKenlM0iFCghIC2LgCD2GpnlX4DTtstAF1w3c46F91Yjc58s6ZnxWDPhhjtU34GwA7zOSUknbZKny6RClRg0D3cONyPN4lOy1dVAxiZQpUaUw5+dvULn70J6Ac1eeqUidx0ktyTWPasivq/8mh/c4VlPemJh7c8kTtw3US2uHCW1so7hW9V11Ukz2G7qoce3MFQ7tx4TGgeTBK9HUhbbSk1CW/GjTN1F2G/QNHrMUzxFlPk9UvUex8lOQHps0D9c0NhPKp3SLwNVsyzXndXVPtewUNcnJ4EKM7mSIm7wTJMh36b4+HokhE+xQTQ3bj5HxryzLx5nt56BPllS1YSGok1VTRox0kQNQPgcrwmgmt2teRjPqqK85EqPIcESLcFtMeWM0HarY8r0cJzV3dIqJEX2Djpp2Y+ccn7AOXCGZY0mMyG2eUmIchvTd2v8JSUNvpXPdFS8C3ZsroHyg0YYYcfeKmOlAjFscSMHHVzZUADFKyXXcRGG/zfBUx2KQp52sjVH/bkwVMWqQkZeuQBcx5jTNpr+bkus2IrQM46Bs25g1CepGb9yfDa7LJ7LaAFNGJoM+uxlzmXaSmlYA52YX1yOxxR5Fm/C93qxQnXBzB8z9Epe3ok30I009b1KHLyTbqCO902aS668jG81mMMJ3N4U6+O5UdL50/0EYtHl6khH9IXf8m5K2/BjOjSBnJ2y3iRH6sEE54ozxiubaD0hVyhCM8/6GerxutF0b48wYqSjzNJybIXwZqGNa4zUqMK49GaV59ustZgxTe8NZlSo9T8jxjnCssfACriFvVnR+g4cB4UXDeIsNMRpoHBwjY4zRi2kWTAUxIsxTlHsHd81kxTXjDAfj32pUKltixNkbFzQxZMKrgPUlrs5JHoixOybW08awHJ4YgxXXvAdmy1lbUlwgVcR4UFHuYI6cssTLz6EsfcVEDVqhqKe9AzF09oYTMTKgcvYnnUq2gus6cHzmY5xnBNNOmktGG1uIeV0NyUhWoa/kWFyUXmWPPC4J4smAq/H+mMJvc0gTp0D0UKguz4H5OnH8fs8qzt3h8MyRvdHI10vIIJdcReN1MsR6g9vuIbzhPVwxWqxyKPdNybH+imurSQxSNDTnxsRfZPvJLge7xMi/pPDbtFUcjxIbZVvp4Ij9lmU9c0G+stNkq57/So41JHJU90WMfZVAjD7073zNyKFDDrlrMdP0VxofuC0mS0a9HlCWQi96UgqEY1NAv19TgULdWGz5nJvI8+Mb6JYdqDgX5bzJHBKfgH0+WzHI8+jaGtzbVzGzYZ8Y6osYWxPcj+qMy+4f6D1aBGfXU09xuB9H3jmc61bEF+C2zvygZORDN6lszfN9kmMTYspvoFGPbLHVIyFq0WC1DOTJopu4GVg2SOxwrFe2yYSJG/pLzUw+FMziG7HE+CzB/ehnf97xXtyO/iMoW6lmi2yQ50chkuxqMUFhkIp1iz78NQb1qp7X5QdqXO5pTyMtL4dJpoF6W51B3DfK9PQsoLAxTQ34fzD5Q6rsjQxIFgTDBS2jEo5e+YbeGBskaROu5tsiHMOMVz7LGOMqtS1ni2hGUqmGLuqky/euI0itmHvQqJ4taAmmhI9DfUOyqDBYoY4ltjcyaPp0BRruGDt4FNILSWaMUoVxy88aDwjnThiqhLsUx22XkeJAcmmK3yG2CTd3/o1wXBZlvsyxDlkbvrK4H+NBd6XS3tgKbrGEt7kyxkH6xDgaGRJAlALOCBV99ftpmm8oOcd7syaCOo4ReQFlqdi2KpFLHMNGVHr66Jh3Z4o6IA90zjRog5jg2QvU8Q1V5nJsHAOEqdIGqFJEfvknID12rNsFyXNnsIy5EqMQ23qPZIqeYFgu+u+XSo6jmtbR4vl+6tiu/aSX8zJfca3KO/W+4nh/y2e5D+S7Sy50aJfO3miWpCNcC8lSk5tzU2NhJc8W71uoTLpRT5ZKPgfKp2RsFmwk3YwRdQjVdjkm25DiSHca/EW+84gwsrI6K4xj2fVowJuu36hLg5cs9aexw4wROQVWWPST2JSQCKsSdMZl3EftXcnEWOeJGDUkH0+2Mu3XQrlxxMghp4WsfozgZ2meGfejjduPypYYkRGr+oFKGVS5TitBvtyWRxaotysSbTsbYiBakoPDKzH6JOyQ/DaUL1UiMY55IgZiRExdZyT2TBwxEI9rykSPGG4EF+3CjgPOleQdKoLUZNdmgzpzV5bCUltDUNxeSLV7YQfNAHxEovbYEkNnbzgTIwPMN0dTCb+LNqaF4++87fXY6TFHqJ/BdZd4IkZckuDbknJNiJFpOEO7LDN2IQbiEUV560G+bkS2xSkvmOKCKyh/z+RPEP+z0Q9K6nAhBtD79kYMRJeEHXc/lP8RSuwEGAxbAPpF8ibyFpW3I+a6bp6IgfhAU8+tjsSIpv19ju8BA6MzPBMjk+wl006LeMjDN41+5xA8EsPE3rAiBpB1n7ShH9HILgahWpFKsDtB2QsM9OwBHomhMpZ3gTwl3ZQYkSFt+y5wpskn28Z32rmqrdtBvejrTnBfHo2xkp9pnseVGCb2hjUxskC+p6qLHKL4hrijB3Yo3MzgXU8jjih9PRIjG87duTwS1U982RADKC4yy6BNZ2jQyuJc5b6JkUGqk6xc3U+lNSfHgc23xAVR7WKeJwkx4uwNa2JEAa7tnjsrTm2YPCimD7QgL8cOT/VMswhqiqJyN46QXKv68cpRkmuHGbrM35DMIJuJEJcL1xco2hBhCZTPi1pi8By3Se5Dkf1yFkhssqGkfoqDyVHyXg6H+K2PIryraGNti1DESEUZV2i+11Zdga0NVBYXOUJGWQehvuqks88Gs635ZbLR4OOdD8glkmaf5+3IotE9By4wFIB6mxYfspp0zNqSqXm+g5u2LQQEVBCw086E1MceMK2Cj7RiNBnTEo57tCsCAryjT0Jvks0scpUQD+Fdb4fJHllP3i/UQ4eEzxNQmcgnD0tRComBnb2TxIuVB/7XbQQEeEVjsvZ9RrVxprg9dP6ACwEYYcQfMMRFOoccyIAuPNxK54bwKgPSCT5HZ1R3riYDGv9FvzvGKHCDLnTFYvAHU9TRpYqp2wtJjoXPEJB2xCgtLQ1vISBAwP8FGACupQXV6n5xuwAAAABJRU5ErkJggg==';
+
+// ════════════════════════════════════════
+//  EMAILS COM ACESSO GERENTE (admin)
+// ════════════════════════════════════════
+const ADMIN_EMAILS = [
+  'stephany@transmaroni.com.br',
+  'maroni.tech@transmaroni.com.br',
+  'willian.similamori@transmaroni.com.br'
+];
+
+// ════════════════════════════════════════
+//  ESTADO & ROTEADOR
+// ════════════════════════════════════════
+const S = { gestorId: null, view: 'login', param: null };
+
+function go(view, param){
+  S.view = view;
+  S.param = param || null;
+  render();
+  window.scrollTo(0,0);
+}
+
+function gestor(){ return db().gestores.find(g => g.id === S.gestorId); }
+
+// ════════════════════════════════════════
+//  RENDER PRINCIPAL
+// ════════════════════════════════════════
+function render(){
+  const root = document.getElementById('root');
+  switch(S.view){
+    case 'login':     root.innerHTML = viewLogin(); break;
+    case 'dashboard': root.innerHTML = viewDashboard(); break;
+    case 'novo':      root.innerHTML = viewForm(null); break;
+    case 'editar':    root.innerHTML = viewForm(S.param); break;
+    case 'detalhe':   root.innerHTML = viewDetalhe(S.param); setupQR(); break;
+    case 'ata':       root.innerHTML = viewAta(S.param); setupAtaQR(); break;
+    case 'config':    root.innerHTML = viewConfig(); break;
+    default:          root.innerHTML = viewLogin();
+  }
+}
+
+// ════════════════════════════════════════
+//  VIEW — LOGIN
+// ════════════════════════════════════════
+function viewLogin(){
+  const gestores = db().gestores;
+  return `
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-card-header" style="background:#111827">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img src="${_LOGO_SRC}" style="height:46px;display:block" alt="Grupo Maroni"/>
+          <div>
+            <div style="font-size:.68rem;font-weight:700;letter-spacing:.14em;color:#f5c800;text-transform:uppercase;margin-bottom:3px">Grupo Maroni</div>
+            <div style="font-size:1rem;font-weight:800;color:#fff;line-height:1.2">Gestão de Treinamentos</div>
+            <div style="font-size:.72rem;color:rgba(255,255,255,.45);margin-top:3px;font-weight:500">G&amp;D · Área de Treinamentos</div>
+          </div>
+        </div>
+      </div>
+      <div class="login-card-body">
+        ${gestores.length ? `
+          <p style="font-size:.7rem;color:#9ca3af;margin-bottom:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Selecione seu perfil</p>
+          ${gestores.map(g=>`
+            <div class="g-item" style="position:relative" onclick="loginComo('${g.id}')">
+              <div class="g-av">${iniciais(g.nome)}</div>
+              <div style="flex:1;min-width:0">
+                <div class="g-nome">${esc(g.nome)}</div>
+                <div class="g-sub">${esc(g.setor||'')}${g.email?' · '+esc(g.email):''}</div>
+              </div>
+              <button onclick="event.stopPropagation();excluirPerfil('${g.id}')" title="Excluir perfil" style="background:none;border:none;cursor:pointer;color:#d1d5db;font-size:.9rem;padding:4px 6px;border-radius:6px;transition:color .15s;flex-shrink:0" onmouseover="this.style.color='#dc2626'" onmouseout="this.style.color='#d1d5db'">✕</button>
+            </div>`).join('')}
+          <div class="sep">ou</div>
+        ` : `<p style="font-size:.85rem;color:#6b7280;margin-bottom:18px;line-height:1.6">Nenhum gestor cadastrado. Crie seu perfil para começar.</p>`}
+        <button class="btn btn-yellow btn-full btn-lg" onclick="modalNovoGestor()">+ Novo Perfil</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function loginComo(id){
+  const g = db().gestores.find(g=>g.id===id);
+  if(!g) return;
+  if(!g.senha){ S.gestorId=id; go('dashboard'); return; }
+  modal(`<h3>Bem-vindo, ${esc(g.nome.split(' ')[0])}</h3>
+    <div class="fg" style="margin-top:8px">
+      <label class="fl">Senha</label>
+      <input id="m-senha-login" class="fc" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')confirmarSenha('${id}')"/>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-yellow btn-sm" onclick="confirmarSenha('${id}')">Entrar</button>
+    </div>`);
+  setTimeout(()=>{ const el=document.getElementById('m-senha-login'); if(el) el.focus(); },120);
+}
+
+function confirmarSenha(id){
+  const d = db();
+  const g = d.gestores.find(g=>g.id===id);
+  const senha = document.getElementById('m-senha-login')?.value||'';
+  if(!g || senha !== g.senha){ toast('Senha incorreta.'); return; }
+  if(!g.admin && ADMIN_EMAILS.includes(g.email.toLowerCase())){
+    g.admin = true; saveDb(d);
+  }
+  closeModal(); S.gestorId=id; go('dashboard');
+}
+
+function excluirPerfil(id){
+  if(!confirm('Excluir este perfil? Esta ação não pode ser desfeita.')) return;
+  const d = db();
+  d.gestores = d.gestores.filter(g=>g.id!==id);
+  saveDb(d);
+  if(S.gestorId===id){ S.gestorId=null; }
+  render();
+}
+
+// ════════════════════════════════════════
+//  VIEW — DASHBOARD
+// ════════════════════════════════════════
+function tItemHtml(t, d, showGestor){
+  const cnt = d.presencas.filter(p=>p.treinamentoId===t.id).length;
+  const dt  = fmtDataCurta(t.data);
+  const gr  = showGestor ? d.gestores.find(g=>g.id===t.gestorId) : null;
+  return `<div class="t-item" data-status="${t.status||'agendado'}" onclick="go('detalhe','${t.id}')">
+    <div class="t-date"><div class="t-date-d">${dt.dia}</div><div class="t-date-m">${dt.mes}</div></div>
+    <div class="t-info">
+      <div class="t-titulo">${esc(t.titulo)}</div>
+      <div class="t-meta">${t.horaInicio||''}${t.horaFim?'–'+t.horaFim:''} · ${esc(t.local||'Sem local')}</div>
+      ${gr?`<div style="font-size:.73rem;color:#888;margin-top:2px">👤 ${esc(gr.nome)}</div>`:''}
+      <div style="margin-top:4px"><span class="badge badge-${t.status||'agendado'}">${statusLabel(t.status)}</span></div>
+    </div>
+    <div class="t-cnt">${cnt}<small>presença${cnt!==1?'s':''}</small></div>
+  </div>`;
+}
+
+function viewDashboard(){
+  const g = gestor();
+  if(!g){ go('login'); return ''; }
+  const d = dbEnsure(db());
+  const hoje = new Date().toISOString().slice(0,10);
+
+  // ── VISÃO DE GERENTE (admin vê todos os gestores) ──
+  if(g.admin){
+    // ── Meus dados pessoais ──
+    const meus = d.treinamentos.filter(t=>t.gestorId===g.id)
+      .sort((a,b)=>(b.data+b.horaInicio).localeCompare(a.data+a.horaInicio));
+    const meusPrx = meus.filter(t=>t.data>=hoje&&t.status!=='encerrado').length;
+    const meusP   = meus.reduce((acc,t)=>acc+d.presencas.filter(p=>p.treinamentoId===t.id).length,0);
+
+    // ── Dados gerente (todos) ──
+    const todos = d.treinamentos.slice().sort((a,b)=>(b.data+b.horaInicio).localeCompare(a.data+a.horaInicio));
+    const totalP     = d.presencas.length;
+    const comAta     = todos.filter(t=>d.atas.some(a=>a.treinamentoId===t.id)).length;
+    const semAta     = todos.filter(t=>t.status==='encerrado'&&!d.atas.some(a=>a.treinamentoId===t.id)).length;
+    const atrasados  = todos.filter(t=>t.data<hoje&&t.status!=='encerrado'&&t.status!=='cancelado').length;
+    const cAgendado  = todos.filter(t=>(t.status||'agendado')==='agendado').length;
+    const cAndamento = todos.filter(t=>t.status==='andamento').length;
+    const cEncerrado = todos.filter(t=>t.status==='encerrado').length;
+    const cCancelado = todos.filter(t=>t.status==='cancelado').length;
+    const gestoresAtivos = d.gestores.filter(gg=>todos.some(t=>t.gestorId===gg.id));
+    return `
+    ${appBar(g)}
+    <div class="page" style="padding-top:20px">
+
+      <!-- ── MEUS TREINAMENTOS ── -->
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-icon" style="background:#f3f4f6">📋</div><div class="stat-num">${meus.length}</div><div class="stat-lbl">Meus Total</div></div>
+        <div class="stat-box"><div class="stat-icon" style="background:#dbeafe">📅</div><div class="stat-num" style="color:#1d4ed8">${meusPrx}</div><div class="stat-lbl">Próximos</div></div>
+        <div class="stat-box"><div class="stat-icon" style="background:#d1fae5">👥</div><div class="stat-num" style="color:#059669">${meusP}</div><div class="stat-lbl">Presenças</div></div>
+      </div>
+      <div class="sec-hdr">
+        <h2>Meus Treinamentos</h2>
+        <button class="btn btn-yellow btn-sm" onclick="go('novo')">+ Novo</button>
+      </div>
+      ${meus.length===0
+        ? `<div class="empty" style="padding:20px 0"><div class="empty-ico" style="font-size:1.8rem">📋</div><h3>Nenhum treinamento criado</h3><p>Clique em "+ Novo" para criar o primeiro.</p></div>`
+        : meus.map(t=>tItemHtml(t,d,false)).join('')}
+
+      <!-- ── DIVISOR GERENTE ── -->
+      <div style="display:flex;align-items:center;gap:12px;margin:28px 0 20px">
+        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+        <div style="display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a;border-radius:20px;padding:6px 14px;font-size:.78rem;color:#92400e;font-weight:700;white-space:nowrap">
+          👑 Visão Gerente — todos os treinamentos
+        </div>
+        <div style="flex:1;height:1px;background:#e5e7eb"></div>
+      </div>
+
+      <!-- ── KPIs GERENTE ── -->
+      <div class="stats-row stats-row-5">
+        <div class="stat-box"><div class="stat-icon" style="background:#f3f4f6">📋</div><div class="stat-num">${todos.length}</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-box"><div class="stat-icon" style="background:#d1fae5">✅</div><div class="stat-num" style="color:#059669">${comAta}</div><div class="stat-lbl">Com Ata</div></div>
+        <div class="stat-box"><div class="stat-icon" style="background:#fef3c7">⚠️</div><div class="stat-num" style="color:#d97706">${semAta}</div><div class="stat-lbl">Sem Ata</div></div>
+        <div class="stat-box"><div class="stat-icon" style="background:#fee2e2">🔴</div><div class="stat-num" style="color:#dc2626">${atrasados}</div><div class="stat-lbl">Atrasados</div></div>
+        <div class="stat-box"><div class="stat-icon" style="background:#dbeafe">👥</div><div class="stat-num" style="color:#1d4ed8">${totalP}</div><div class="stat-lbl">Presenças</div></div>
+      </div>
+      <div class="status-bar-row">
+        <button class="status-bar-pill" style="background:#dbeafe;color:#1e40af" onclick="document.getElementById('af-status').value='agendado';aplicarFiltroAdmin()">📅 ${cAgendado} Agendados</button>
+        <button class="status-bar-pill" style="background:#fef3c7;color:#92400e" onclick="document.getElementById('af-status').value='andamento';aplicarFiltroAdmin()">▶️ ${cAndamento} Em Andamento</button>
+        <button class="status-bar-pill" style="background:#d1fae5;color:#065f46" onclick="document.getElementById('af-status').value='encerrado';aplicarFiltroAdmin()">✅ ${cEncerrado} Encerrados</button>
+        <button class="status-bar-pill" style="background:#fee2e2;color:#991b1b" onclick="document.getElementById('af-status').value='cancelado';aplicarFiltroAdmin()">❌ ${cCancelado} Cancelados</button>
+      </div>
+      <div class="filter-bar">
+        <input id="af-q" type="text" placeholder="🔍 Buscar por título, gestor ou local..." oninput="aplicarFiltroAdmin()"/>
+        <select id="af-gestor" onchange="aplicarFiltroAdmin()">
+          <option value="">👥 Todos os gestores</option>
+          ${gestoresAtivos.map(gg=>`<option value="${gg.id}">${esc(gg.nome)}</option>`).join('')}
+        </select>
+        <select id="af-status" onchange="aplicarFiltroAdmin()">
+          <option value="">📋 Todos os status</option>
+          <option value="agendado">📅 Agendado</option>
+          <option value="andamento">▶️ Em Andamento</option>
+          <option value="encerrado">✅ Encerrado</option>
+          <option value="cancelado">❌ Cancelado</option>
+        </select>
+        <button class="btn btn-outline btn-sm" onclick="limparFiltrosAdmin()">✖ Limpar</button>
+      </div>
+      <div id="admin-lista">${adminListaHtml(todos,d)}</div>
+    </div>
+    <button class="fab no-print" onclick="go('novo')" title="Novo Treinamento">+</button>`;
+  }
+
+  // ── VISÃO NORMAL DE GESTOR ──
+  const meus = d.treinamentos.filter(t=>t.gestorId===g.id)
+    .sort((a,b)=>(b.data+b.horaInicio).localeCompare(a.data+a.horaInicio));
+  const prox   = meus.filter(t=>t.data>=hoje&&t.status!=='encerrado').length;
+  const totalP = meus.reduce((acc,t)=>acc+d.presencas.filter(p=>p.treinamentoId===t.id).length,0);
+
+  return `
+  ${appBar(g)}
+  <div class="page" style="padding-top:20px">
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-icon" style="background:#f3f4f6">📋</div><div class="stat-num">${meus.length}</div><div class="stat-lbl">Total</div></div>
+      <div class="stat-box"><div class="stat-icon" style="background:#dbeafe">📅</div><div class="stat-num" style="color:#1d4ed8">${prox}</div><div class="stat-lbl">Próximos</div></div>
+      <div class="stat-box"><div class="stat-icon" style="background:#d1fae5">👥</div><div class="stat-num" style="color:#059669">${totalP}</div><div class="stat-lbl">Presenças</div></div>
+    </div>
+    <div class="sec-hdr">
+      <h2>Meus Treinamentos</h2>
+      <button class="btn btn-yellow btn-sm" onclick="go('novo')">+ Novo</button>
+    </div>
+    ${meus.length===0 ? `
+      <div class="empty">
+        <div class="empty-ico">📋</div>
+        <h3>Nenhum treinamento criado</h3>
+        <p>Clique em "+ Novo" para criar seu primeiro treinamento.</p>
+        <button class="btn btn-yellow mt-4" onclick="go('novo')">Criar Treinamento</button>
+      </div>` :
+    meus.map(t=>tItemHtml(t,d,false)).join('')}
+  </div>
+  <button class="fab no-print" onclick="go('novo')" title="Novo Treinamento">+</button>`;
+}
+
+
+// ════════════════════════════════════════
+//  ADMIN — lista e filtros
+// ════════════════════════════════════════
+function adminListaHtml(lista, d){
+  if(!lista.length) return `<div class="empty"><div class="empty-ico">🔍</div><h3>Nenhum treinamento encontrado</h3><p>Tente ajustar os filtros.</p></div>`;
+  const hoje = new Date().toISOString().slice(0,10);
+  return lista.map(t=>{
+    const gg = d.gestores.find(g=>g.id===t.gestorId);
+    const temAta   = d.atas.some(a=>a.treinamentoId===t.id);
+    const atrasado = t.data<hoje&&t.status!=='encerrado'&&t.status!=='cancelado';
+    const presCount= d.presencas.filter(p=>p.treinamentoId===t.id).length;
+    const atrasadoTag = atrasado
+      ? `<span style="font-size:.67rem;font-weight:700;color:#dc2626;background:#fee2e2;padding:2px 8px;border-radius:20px">🔴 Atrasado</span>`
+      : '';
+    const ataBtn = `<button onclick="event.stopPropagation();go('ata','${t.id}')"
+        style="background:${temAta?'#d1fae5':'#fef9c3'};border:none;cursor:pointer;padding:5px 11px;border-radius:7px;font-size:.75rem;font-weight:600;color:${temAta?'#065f46':'#92400e'};font-family:inherit;transition:opacity .15s"
+        onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+        📄 ${temAta?'Ver Ata':'Gerar Ata'}
+      </button>`;
+    const presBtn = `<button onclick="event.stopPropagation();go('detalhe','${t.id}')"
+        style="background:#f3f4f6;border:none;cursor:pointer;padding:5px 11px;border-radius:7px;font-size:.75rem;font-weight:600;color:#374151;font-family:inherit;transition:opacity .15s"
+        onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+        👥 ${presCount} presença${presCount!==1?'s':''}
+      </button>`;
+    return `<div class="t-item" data-status="${t.status||'agendado'}" onclick="go('detalhe','${t.id}')" style="cursor:pointer">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <div class="av" style="width:22px;height:22px;font-size:.58rem;flex-shrink:0">${iniciais(gg?.nome||'?')}</div>
+            <span style="font-size:.71rem;color:#6b7280;font-weight:500">${esc(gg?.nome||'—')}</span>
+            ${atrasadoTag}
+          </div>
+          <div style="font-weight:700;color:#111827;font-size:.93rem;line-height:1.3;margin-bottom:6px">${esc(t.titulo)}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="pill" style="font-size:.7rem">📅 ${fmtData(t.data)}</span>
+            ${t.horaInicio?`<span class="pill" style="font-size:.7rem">⏰ ${t.horaInicio}</span>`:''}
+            ${t.local?`<span class="pill" style="font-size:.7rem">📍 ${esc(t.local)}</span>`:''}
+          </div>
+        </div>
+        <span class="badge badge-${t.status||'agendado'}" style="flex-shrink:0;margin-top:2px">${statusLabel(t.status)}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid #f3f4f6">
+        ${presBtn}
+        ${ataBtn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function aplicarFiltroAdmin(){
+  const d = dbEnsure(db());
+  const gestorId = document.getElementById('af-gestor')?.value||'';
+  const status   = document.getElementById('af-status')?.value||'';
+  const q = (document.getElementById('af-q')?.value||'').toLowerCase().trim();
+  let lista = d.treinamentos.slice().sort((a,b)=>(b.data+b.horaInicio).localeCompare(a.data+a.horaInicio));
+  if(gestorId) lista = lista.filter(t=>t.gestorId===gestorId);
+  if(status)   lista = lista.filter(t=>(t.status||'agendado')===status);
+  if(q) lista = lista.filter(t=>{
+    const gg = d.gestores.find(g=>g.id===t.gestorId);
+    return t.titulo.toLowerCase().includes(q)||(gg?.nome||'').toLowerCase().includes(q)||(t.local||'').toLowerCase().includes(q);
+  });
+  const el = document.getElementById('admin-lista');
+  if(el) el.innerHTML = adminListaHtml(lista, d);
+}
+
+function limparFiltrosAdmin(){
+  const q=document.getElementById('af-q');
+  const g=document.getElementById('af-gestor');
+  const s=document.getElementById('af-status');
+  if(q)q.value=''; if(g)g.value=''; if(s)s.value='';
+  aplicarFiltroAdmin();
+}
+
+// ════════════════════════════════════════
+//  VIEW — FORMULÁRIO TREINAMENTO
+// ════════════════════════════════════════
+function viewForm(id){
+  const d = db();
+  const t = id ? d.treinamentos.find(t=>t.id===id) : null;
+  const g = gestor();
+  const hoje = new Date().toISOString().slice(0,10);
+  return `
+  ${appBar(g, id?'Editar Treinamento':'Novo Treinamento')}
+  <div class="page" style="padding-top:22px;max-width:580px">
+    <div class="card">
+      <div class="card-title">${id?'✏️ Editar':'📋 Novo'} Treinamento</div>
+      <div class="fg">
+        <label class="fl">Título do Treinamento *</label>
+        <input id="f-titulo" class="fc" type="text" placeholder="Ex: Normas de Segurança" value="${esc(t?.titulo||'')}"/>
+        <div class="field-error" id="e-titulo">Informe o título.</div>
+      </div>
+      <div class="f-row">
+        <div class="fg">
+          <label class="fl">Data *</label>
+          <input id="f-data" class="fc" type="date" value="${t?.data||hoje}"/>
+          <div class="field-error" id="e-data">Informe a data.</div>
+        </div>
+        <div class="fg">
+          <label class="fl">Local / Sala</label>
+          <input id="f-local" class="fc" type="text" placeholder="Sala 3 / Teams" value="${esc(t?.local||'')}"/>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="fg">
+          <label class="fl">Hora Início</label>
+          <input id="f-inicio" class="fc" type="time" value="${t?.horaInicio||''}"/>
+        </div>
+        <div class="fg">
+          <label class="fl">Hora Fim</label>
+          <input id="f-fim" class="fc" type="time" value="${t?.horaFim||''}"/>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Instrutor / Facilitador</label>
+        <input id="f-instrutor" class="fc" type="text" placeholder="Nome do instrutor" value="${esc(t?.instrutor||g?.nome||'')}"/>
+      </div>
+      <div class="fg">
+        <label class="fl">Pauta / Descrição</label>
+        <textarea id="f-descricao" class="fc" rows="3" placeholder="Tópicos a abordar...">${esc(t?.descricao||'')}</textarea>
+      </div>
+      <div class="fg">
+        <label class="fl">🔗 Projeto Notion (URL — opcional)</label>
+        <input id="f-notion" class="fc" type="url" placeholder="https://notion.so/..." value="${esc(t?.notionUrl||'')}"/>
+        <div style="font-size:.72rem;color:#aaa;margin-top:3px">Cole a URL do projeto Notion relacionado. Ao iniciar o treinamento, um subitem será criado automaticamente.</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button class="btn btn-outline" onclick="go('dashboard')">Cancelar</button>
+        <button class="btn btn-yellow" style="flex:1" onclick="salvarTreinamento(${id?`'${id}'`:'null'})">${id?'Salvar':'Criar Treinamento'}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function salvarTreinamento(id){
+  const titulo = document.getElementById('f-titulo').value.trim();
+  const data   = document.getElementById('f-data').value;
+  let ok=true;
+  if(!titulo){ document.getElementById('e-titulo').classList.add('show'); document.getElementById('f-titulo').classList.add('fc-err'); ok=false; }
+  if(!data){   document.getElementById('e-data').classList.add('show');   document.getElementById('f-data').classList.add('fc-err');   ok=false; }
+  if(!ok) return;
+  const d = db();
+  const obj = {
+    titulo,data,
+    local:      document.getElementById('f-local').value.trim(),
+    horaInicio: document.getElementById('f-inicio').value,
+    horaFim:    document.getElementById('f-fim').value,
+    instrutor:  document.getElementById('f-instrutor').value.trim(),
+    descricao:  document.getElementById('f-descricao').value.trim(),
+    notionUrl:  document.getElementById('f-notion').value.trim()
+  };
+  if(id){
+    const i = d.treinamentos.findIndex(t=>t.id===id);
+    if(i>=0) d.treinamentos[i]={...d.treinamentos[i],...obj};
+    saveDb(d); toast('Atualizado!'); go('detalhe',id);
+  } else {
+    const nt = {id:uid(), gestorId:gestor().id, status:'agendado', criadoEm:new Date().toISOString(), ...obj};
+    d.treinamentos.push(nt); saveDb(d);
+
+    // Cria invite no Outlook via Power Automate (se configurado)
+    const outlookUrl = cfg().outlookEndpoint;
+    if(outlookUrl){
+      const g = gestor();
+      try {
+        await fetch(outlookUrl, {
+          method : 'POST',
+          headers: {'Content-Type':'application/json'},
+          body   : JSON.stringify({
+            titulo     : obj.titulo,
+            dataHoraInicio: `${obj.data}T${obj.horaInicio||'08:00'}:00`,
+            dataHoraFim   : `${obj.data}T${obj.horaFim  ||'09:00'}:00`,
+            local      : obj.local     || '',
+            instrutor  : obj.instrutor || '',
+            descricao  : obj.descricao || '',
+            gestorNome : g?.nome  || '',
+            gestorEmail: g?.email || ''
+          })
+        });
+        toast('✅ Treinamento criado e invite enviado ao Outlook!');
+      } catch(e){
+        toast('Treinamento criado. ⚠️ Invite Outlook falhou — verifique a URL.');
+        console.warn('Outlook endpoint error:', e.message);
+      }
+    } else {
+      toast('Treinamento criado!');
+    }
+    go('detalhe', nt.id);
+  }
+}
+
+// ════════════════════════════════════════
+//  VIEW — DETALHE
+// ════════════════════════════════════════
+function viewDetalhe(id){
+  const d = db();
+  const t = d.treinamentos.find(t=>t.id===id);
+  if(!t){ go('dashboard'); return ''; }
+  const g = gestor();
+  const isOwner = g && g.id === t.gestorId;
+  const presencas = d.presencas.filter(p=>p.treinamentoId===id).sort((a,b)=>a.registradoEm.localeCompare(b.registradoEm));
+  const url = buildUrl(id);
+  return `
+  ${appBar(g)}
+  <div class="page" style="padding-top:18px">
+    <div class="card">
+      <div class="flex items-center justify-between gap-2 wrap" style="margin-bottom:10px">
+        <h2 style="font-size:1.15rem;font-weight:800;flex:1">${esc(t.titulo)}</h2>
+        <span class="badge badge-${t.status||'agendado'}">${statusLabel(t.status)}</span>
+      </div>
+      <div class="flex wrap">
+        <span class="pill">📅 ${fmtData(t.data)}</span>
+        <span class="pill">⏰ ${t.horaInicio||'—'}–${t.horaFim||'—'}</span>
+        ${t.local?`<span class="pill">📍 ${esc(t.local)}</span>`:''}
+        ${t.instrutor?`<span class="pill">👤 ${esc(t.instrutor)}</span>`:''}
+        ${t.notionUrl?`<a class="pill" href="${esc(t.notionUrl)}" target="_blank" style="text-decoration:none;color:#1a1a1a">🔗 Notion</a>`:''}
+      </div>
+      ${t.descricao?`<p style="font-size:.8rem;color:#666;margin-top:8px;white-space:pre-line">${esc(t.descricao)}</p>`:''}
+      <hr/>
+      <div class="flex gap-2 wrap">
+        ${isOwner?`<button class="btn btn-outline btn-sm" onclick="go('editar','${id}')">✏️ Editar</button>`:''}
+        ${isOwner&&t.status!=='andamento'?`<button class="btn btn-outline btn-sm" onclick="setStatus('${id}','andamento')">▶️ Iniciar</button>`:''}
+        ${isOwner&&t.status!=='encerrado'?`<button class="btn btn-outline btn-sm" onclick="setStatus('${id}','encerrado')">✅ Encerrar</button>`:''}
+        ${isOwner&&t.status==='andamento'&&t.notionUrl?`<a class="btn btn-dark btn-sm" href="${esc(t.notionUrl)}" target="_blank">📝 Transcrever no Notion</a>`:''}
+        <button class="btn btn-yellow btn-sm" onclick="go('ata','${id}')">📄 Gerar Ata</button>
+        ${isOwner?`<button class="btn btn-danger btn-sm" onclick="confirmarExcluir('${id}')">🗑️</button>`:''}
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:14px;margin-bottom:14px">
+      <div class="qr-wrap" style="margin-bottom:0">
+        <p style="font-size:.73rem;font-weight:700;color:#555;margin-bottom:6px">QR Code — Confirmar Presença</p>
+        <div id="qrcode"></div>
+        <div class="qr-url">${url}</div>
+      </div>
+      <div class="card mb-0" style="margin-bottom:0">
+        <p style="font-size:.73rem;font-weight:700;color:#555;margin-bottom:10px">Compartilhar link</p>
+        <input id="url-inp" class="fc" style="font-size:.7rem;margin-bottom:8px" value="${url}" readonly onclick="this.select()"/>
+        <button class="btn btn-dark btn-full btn-sm" onclick="copiarLink()">📋 Copiar Link</button>
+        <button class="btn btn-outline btn-full btn-sm mt-3" onclick="window.open(buildUrl('${id}'),'_blank')">🔗 Abrir formulário</button>
+        <hr/>
+        <button class="btn btn-outline btn-full btn-sm" onclick="exportarCSV('${id}')">📥 Exportar CSV</button>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between" style="margin-bottom:10px">
+      <h2 style="font-size:.95rem;font-weight:700">
+        Presenças
+        <span style="background:#f5c800;color:#1a1a1a;padding:2px 10px;border-radius:99px;font-size:.82rem;margin-left:6px">${presencas.length}</span>
+      </h2>
+      <button class="btn btn-outline btn-sm" onclick="render()">🔄 Atualizar</button>
+    </div>
+    ${presencas.length===0 ? `
+      <div class="empty" style="padding:28px">
+        <div class="empty-ico">📲</div>
+        <h3>Aguardando confirmações</h3>
+        <p>Compartilhe o QR Code ou o link acima.</p>
+      </div>` :
+    `<div class="card" style="padding:0;overflow:hidden;margin-bottom:0">
+      <div style="overflow-x:auto">
+        <table class="p-table">
+          <thead><tr><th>#</th><th>Nome</th><th>Matrícula</th><th>E-mail</th><th>Horário</th><th>Assin.</th><th></th></tr></thead>
+          <tbody>
+            ${presencas.map((p,i)=>`<tr>
+              <td style="color:#aaa;font-size:.72rem">${i+1}</td>
+              <td><strong>${esc(p.nome)}</strong></td>
+              <td>${esc(p.matricula||'—')}</td>
+              <td style="font-size:.75rem;color:#666">${esc(p.email||'—')}</td>
+              <td style="font-size:.72rem;color:#aaa">${p.registradoEm?new Date(p.registradoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—'}</td>
+              <td>${p.assinatura?`<img class="assin-img" src="${p.assinatura}" onclick="zoomAssin('${p.id}')" title="Ver assinatura"/>`:'—'}</td>
+              <td><button class="btn btn-outline btn-sm" style="padding:4px 8px;font-size:.7rem" onclick="removerPresenca('${p.id}','${id}')">✕</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`}
+    ${(()=>{
+      const atasT = dbEnsure(d).atas.filter(a=>a.treinamentoId===id);
+      if(!atasT.length) return '';
+      return `<div class="card" style="margin-top:14px">
+        <div class="flex items-center justify-between" style="margin-bottom:10px">
+          <h3 style="font-size:.9rem;font-weight:700">📄 Atas Salvas</h3>
+        </div>
+        ${atasT.map(a=>`
+          <div class="flex items-center justify-between" style="padding:8px 0;border-bottom:1px solid #f0f0f0">
+            <span style="font-size:.8rem;color:#555">Gerada em ${new Date(a.geradaEm).toLocaleString('pt-BR')}</span>
+            <button class="btn btn-outline btn-sm" onclick="go('ata','${id}')">Ver / Imprimir</button>
+          </div>`).join('')}
+      </div>`;
+    })()}
+    <div style="height:20px"></div>
+  </div>`;
+}
+
+// ════════════════════════════════════════
+//  VIEW — ATA
+// ════════════════════════════════════════
+function viewAta(id){
+  const d = db();
+  const t = d.treinamentos.find(t=>t.id===id);
+  if(!t){ go('dashboard'); return ''; }
+  const g = d.gestores.find(g=>g.id===t.gestorId);
+  const pres = d.presencas.filter(p=>p.treinamentoId===id).sort((a,b)=>a.registradoEm.localeCompare(b.registradoEm));
+  const tdLbl = `padding:9px 13px;border:1px solid #e5e7eb;font-weight:700;color:#6b7280;font-size:.71rem;text-transform:uppercase;letter-spacing:.05em;background:#f9fafb;white-space:nowrap`;
+  const tdVal = `padding:9px 13px;border:1px solid #e5e7eb;color:#111827;font-size:.88rem`;
+  return `
+  <div style="background:#111827;padding:12px 20px;display:flex;align-items:center;justify-content:space-between" class="no-print">
+    <img src="${_LOGO_SRC}" style="height:32px" alt="Grupo Maroni"/>
+    <div class="flex gap-2">
+      <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="go('detalhe','${id}')">← Voltar</button>
+      <button class="btn btn-dark btn-sm" onclick="salvarAta('${id}')">💾 Salvar Ata</button>
+      <button class="btn btn-yellow btn-sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
+    </div>
+  </div>
+  <div style="max-width:800px;margin:24px auto;padding:0 16px 40px">
+    <div class="card">
+
+      <!-- ── CABEÇALHO ── -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:16px;margin-bottom:20px;border-bottom:3px solid #f5c800">
+        <div>
+          <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#9ca3af;margin-bottom:5px">Grupo Maroni · Gestão &amp; Desenvolvimento</div>
+          <div style="font-size:1.55rem;font-weight:900;color:#111827;line-height:1;letter-spacing:-.01em">ATA DE TREINAMENTO</div>
+          <div style="font-size:.8rem;color:#6b7280;margin-top:5px;font-weight:500">Lista de Presença e Registro do Treinamento</div>
+        </div>
+        <img src="${_LOGO_FULL_SRC}" style="height:52px;flex-shrink:0;margin-left:20px" alt="Grupo Maroni"/>
+      </div>
+
+      <!-- ── INFORMAÇÕES ── -->
+      <table style="width:100%;border-collapse:collapse;margin-bottom:22px">
+        <tr>
+          <td style="${tdLbl}">Treinamento</td>
+          <td style="${tdVal};font-weight:700" colspan="3">${esc(t.titulo)}</td>
+        </tr>
+        <tr>
+          <td style="${tdLbl}">Data</td>
+          <td style="${tdVal}">${fmtData(t.data)}</td>
+          <td style="${tdLbl}">Horário</td>
+          <td style="${tdVal}">${t.horaInicio||'—'} às ${t.horaFim||'—'}</td>
+        </tr>
+        <tr>
+          <td style="${tdLbl}">Instrutor</td>
+          <td style="${tdVal}">${esc(t.instrutor||'—')}</td>
+          <td style="${tdLbl}">Local</td>
+          <td style="${tdVal}">${esc(t.local||'—')}</td>
+        </tr>
+        <tr>
+          <td style="${tdLbl}">Gestor</td>
+          <td style="${tdVal}">${esc(g?.nome||'—')}</td>
+          <td style="${tdLbl}">Presentes</td>
+          <td style="${tdVal};font-weight:700;color:#059669">${pres.length}</td>
+        </tr>
+      </table>
+
+      <!-- ── QR + PARTICIPANTES ── -->
+      <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:22px">
+        <div style="flex-shrink:0;text-align:center">
+          <div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:8px">Lista Digital</div>
+          <div id="ata-qr" style="border:1px solid #e5e7eb;border-radius:8px;padding:6px;display:inline-block"></div>
+          <div style="font-size:.63rem;color:#9ca3af;margin-top:6px;max-width:120px;line-height:1.4">Escaneie para confirmar presença</div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:8px">Participantes</div>
+          ${pres.length===0 ? `<div style="padding:24px;text-align:center;border:1px solid #e5e7eb;border-radius:8px;color:#d1d5db;font-size:.85rem">Nenhuma presença registrada.</div>` : `
+          <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+            <thead>
+              <tr style="background:#111827">
+                <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:36px">Nº</th>
+                <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:left;width:80px">Matrícula</th>
+                <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:left">Nome do Colaborador</th>
+                <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:110px">Confirmação de Presença</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pres.map((p,i)=>`<tr style="${i%2===0?'background:#f9fafb':'background:#fff'}">
+                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center;color:#9ca3af;font-size:.75rem">${i+1}</td>
+                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;color:#374151">${esc(p.matricula||'—')}</td>
+                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827">${esc(p.nome)}</td>
+                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center">${p.assinatura?`<img style="width:88px;height:30px;object-fit:contain" src="${p.assinatura}"/>`:'—'}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`}
+        </div>
+      </div>
+
+      <!-- ── OBSERVAÇÕES ── -->
+      <div style="margin-bottom:24px">
+        <div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:8px">Observações / Pauta</div>
+        <div style="min-height:70px;border:1px solid #e5e7eb;border-radius:8px;padding:13px;font-size:.87rem;color:#374151;line-height:1.7;white-space:pre-line">${t.descricao?esc(t.descricao):'&nbsp;'}</div>
+      </div>
+
+      <!-- ── ASSINATURAS ── -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;padding-top:16px;border-top:1px solid #f3f4f6">
+        ${assinBox('Instrutor / Facilitador',t.instrutor||'')}
+        ${assinBox('Gestor Responsável',g?.nome||'')}
+      </div>
+
+      <!-- ── RODAPÉ ── -->
+      <div style="text-align:center;margin-top:20px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:.63rem;color:#d1d5db">
+        Gerado em ${new Date().toLocaleString('pt-BR')} · Grupo Maroni · Gestão &amp; Desenvolvimento
+      </div>
+    </div>
+  </div>`;
+}
+
+function setupAtaQR(){
+  const el = document.getElementById('ata-qr');
+  if(!el || typeof QRCode==='undefined') return;
+  el.innerHTML='';
+  new QRCode(el,{text:buildUrl(S.param),width:120,height:120,colorDark:'#111827',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+}
+
+function assinBox(l,n){ return `<div><div class="assin-linha"></div><div style="font-size:.71rem;color:#6b7280;margin-top:4px">${l}</div><div style="font-size:.82rem;font-weight:700;margin-top:2px">${esc(n)}</div></div>`; }
+
+function salvarAta(treinamentoId){
+  const d = dbEnsure(db());
+  const jaExiste = d.atas.find(a=>a.treinamentoId===treinamentoId);
+  if(jaExiste){
+    // Atualiza timestamp da última geração
+    jaExiste.geradaEm = new Date().toISOString();
+    saveDb(d); toast('Ata atualizada!'); return;
+  }
+  d.atas.push({id:uid(), treinamentoId, geradaEm:new Date().toISOString()});
+  saveDb(d); toast('✅ Ata salva!');
+}
+
+// ════════════════════════════════════════
+//  VIEW — FORMULÁRIO DE INSCRIÇÃO (participante)
+// ════════════════════════════════════════
+function viewInscricao(id){
+  const d = db();
+  const t = d.treinamentos.find(t=>t.id===id);
+  if(!t){
+    document.getElementById('root').innerHTML = `
+      <div class="ins-header">
+        <img src="${_LOGO_SRC}" style="height:38px;display:block" alt="Grupo Maroni"/>
+        <div>
+          <div style="font-size:.66rem;font-weight:700;letter-spacing:.12em;color:#f5c800;text-transform:uppercase;margin-bottom:2px">Grupo Maroni</div>
+          <div style="font-size:.88rem;font-weight:800;color:#fff">Lista de Presença Digital</div>
+        </div>
+      </div>
+      <div class="ins-wrap">
+        <div class="tela ativa tela-err">
+          <div class="tela-icone">⚠️</div>
+          <h2>Treinamento não encontrado</h2>
+          <p>Este link pode estar desatualizado. Peça um novo QR Code ao responsável.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('root').innerHTML = `
+  <div class="ins-header">
+    <img src="${_LOGO_SRC}" style="height:40px;display:block" alt="Grupo Maroni"/>
+    <div>
+      <div style="font-size:.66rem;font-weight:700;letter-spacing:.12em;color:#f5c800;text-transform:uppercase;margin-bottom:2px">Grupo Maroni</div>
+      <div style="font-size:.88rem;font-weight:800;color:#fff">Lista de Presença Digital</div>
+      <div style="font-size:.7rem;color:rgba(255,255,255,.45);margin-top:2px">Gestão &amp; Desenvolvimento</div>
+    </div>
+  </div>
+  <div class="ins-wrap">
+
+    <div id="ins-form-area">
+      <div class="evento-card">
+        <div class="ev-lbl">Treinamento</div>
+        <div class="ev-val" style="font-size:1rem;font-weight:800">${esc(t.titulo)}</div>
+        <div class="ev-grid">
+          <div><div class="ev-lbl">Data</div><div class="ev-val">${fmtData(t.data)}</div></div>
+          <div><div class="ev-lbl">Horário</div><div class="ev-val">${t.horaInicio||'—'}–${t.horaFim||'—'}</div></div>
+          ${t.local?`<div><div class="ev-lbl">Local</div><div class="ev-val">${esc(t.local)}</div></div>`:''}
+          ${t.instrutor?`<div><div class="ev-lbl">Instrutor</div><div class="ev-val">${esc(t.instrutor)}</div></div>`:''}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">✍️ Confirme sua presença</div>
+        <div class="fg">
+          <label class="fl">Nome completo *</label>
+          <input id="i-nome" class="fc" type="text" placeholder="Seu nome" autocomplete="name"/>
+          <div class="field-error" id="ei-nome">Informe seu nome.</div>
+        </div>
+        <div class="fg">
+          <label class="fl">Matrícula *</label>
+          <input id="i-mat" class="fc" type="text" placeholder="Ex: 12345" inputmode="numeric"/>
+          <div class="field-error" id="ei-mat">Informe sua matrícula.</div>
+        </div>
+        <div class="fg">
+          <label class="fl">E-mail corporativo</label>
+          <input id="i-email" class="fc" type="email" placeholder="nome@transmaroni.com.br" inputmode="email" autocomplete="email"/>
+          <div class="field-error" id="ei-email">E-mail inválido.</div>
+        </div>
+        <div class="fg">
+          <label class="fl">Assinatura digital *</label>
+          <div class="canvas-wrap">
+            <canvas id="sig-canvas"></canvas>
+            <div class="canvas-hint" id="sig-hint">Assine aqui com o dedo ou mouse</div>
+          </div>
+          <button class="btn-clear" onclick="limparSig()">Limpar assinatura</button>
+          <div class="field-error" id="ei-sig">Por favor, assine.</div>
+        </div>
+        <button class="btn btn-yellow btn-full btn-lg" id="btn-confirmar" onclick="confirmarPresenca('${id}')">
+          ✅ Confirmar Presença
+        </button>
+      </div>
+    </div>
+
+    <div class="card tela tela-ok" id="ins-ok" style="margin-top:0">
+      <div class="tela-icone">✅</div>
+      <h2>Presença confirmada!</h2>
+      <p id="ins-ok-msg"></p>
+    </div>
+
+    <div class="card tela tela-err" id="ins-err" style="margin-top:0">
+      <div class="tela-icone">❌</div>
+      <h2 id="ins-err-titulo">Erro</h2>
+      <p id="ins-err-msg"></p>
+      <button class="btn btn-yellow mt-4" onclick="document.getElementById('ins-err').classList.remove('ativa')">Tentar novamente</button>
+    </div>
+
+  </div>`;
+
+  setupSig();
+}
+
+// ════════════════════════════════════════
+//  CANVAS ASSINATURA
+// ════════════════════════════════════════
+let _sigDrawing = false, _sigHasData = false;
+
+function setupSig(){
+  const c = document.getElementById('sig-canvas');
+  if(!c) return;
+  const ctx = c.getContext('2d');
+  const resize = () => {
+    const dpr = window.devicePixelRatio||1;
+    const w = c.offsetWidth, h = c.offsetHeight;
+    c.width = w*dpr; c.height = h*dpr;
+    ctx.scale(dpr,dpr);
+    ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  };
+  resize();
+  const pos = e => { const r=c.getBoundingClientRect(),t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; };
+  c.onmousedown = e => { _sigDrawing=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y); };
+  c.onmousemove = e => { if(!_sigDrawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); markSig(); };
+  c.onmouseup = c.onmouseleave = () => _sigDrawing=false;
+  c.ontouchstart = e => { e.preventDefault(); _sigDrawing=true; ctx.beginPath(); const p=pos(e); ctx.moveTo(p.x,p.y); };
+  c.ontouchmove  = e => { e.preventDefault(); if(!_sigDrawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); markSig(); };
+  c.ontouchend   = () => _sigDrawing=false;
+}
+
+function markSig(){
+  _sigHasData=true;
+  const h=document.getElementById('sig-hint');
+  if(h) h.style.display='none';
+}
+
+function limparSig(){
+  const c=document.getElementById('sig-canvas');
+  if(!c) return;
+  c.getContext('2d').clearRect(0,0,c.width,c.height);
+  _sigHasData=false;
+  const h=document.getElementById('sig-hint');
+  if(h) h.style.display='flex';
+}
+
+// ════════════════════════════════════════
+//  CONFIRMAR PRESENÇA (participante)
+// ════════════════════════════════════════
+async function confirmarPresenca(treinamentoId){
+  const nome  = document.getElementById('i-nome').value.trim();
+  const mat   = document.getElementById('i-mat').value.trim();
+  const email = document.getElementById('i-email').value.trim();
+  let ok=true;
+
+  document.querySelectorAll('.field-error').forEach(e=>e.classList.remove('show'));
+  document.querySelectorAll('.fc-err').forEach(e=>e.classList.remove('fc-err'));
+
+  if(!nome)  { show('ei-nome'); err('i-nome'); ok=false; }
+  if(!mat)   { show('ei-mat');  err('i-mat');  ok=false; }
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ show('ei-email'); err('i-email'); ok=false; }
+  if(!_sigHasData){ show('ei-sig'); ok=false; }
+  if(!ok) return;
+
+  const d = db();
+  const dup = d.presencas.find(p=>p.treinamentoId===treinamentoId&&((p.matricula&&p.matricula===mat)||(p.email&&email&&p.email===email)));
+  if(dup){ mostrarErroIns('Presença já registrada','Você já confirmou presença neste treinamento anteriormente.'); return; }
+
+  // Bloqueia botão e mostra spinner
+  const btn = document.getElementById('btn-confirmar');
+  if(btn){ btn.disabled=true; btn.innerHTML='<div class="spinner" style="width:20px;height:20px;margin:0;border-width:2px"></div> Registrando...'; }
+
+  const assin        = document.getElementById('sig-canvas').toDataURL('image/png');
+  const registradoEm = new Date().toISOString();
+  const t            = d.treinamentos.find(t=>t.id===treinamentoId);
+
+  // 1. Salva no localStorage (sempre funciona, inclusive offline)
+  d.presencas.push({id:uid(), treinamentoId, nome, matricula:mat, email:email||'', assinatura:assin, registradoEm});
+  saveDb(d);
+
+  // 2. Envia para o Power Automate → SharePoint (se configurado)
+  const endpoint = cfg().presencaEndpoint;
+  if(endpoint){
+    try {
+      await fetch(endpoint, {
+        method : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body   : JSON.stringify({
+          treinamento: t?.titulo   || '',
+          data       : t?.data     || '',
+          horario    : `${t?.horaInicio||''}–${t?.horaFim||''}`,
+          local      : t?.local    || '',
+          instrutor  : t?.instrutor|| '',
+          nome, matricula:mat, email:email||'',
+          timestamp  : registradoEm
+        })
+      });
+    } catch(e){
+      console.warn('PA endpoint error:', e.message);
+    }
+  }
+
+  document.getElementById('ins-form-area').style.display='none';
+  document.getElementById('ins-ok-msg').innerHTML =
+    `<strong>${esc(nome)}</strong>, sua presença em <strong>"${esc(t?.titulo||'')}"</strong> foi registrada!`
+    + (endpoint ? '<br><br>✅ Dados enviados ao SharePoint.' : '')
+    + `<br><br>📅 ${fmtData(t?.data||'')} &nbsp;⏰ ${t?.horaInicio||''}–${t?.horaFim||''}`;
+  document.getElementById('ins-ok').classList.add('ativa');
+}
+
+function mostrarErroIns(titulo, msg){
+  document.getElementById('ins-err-titulo').textContent = titulo;
+  document.getElementById('ins-err-msg').textContent = msg;
+  document.getElementById('ins-err').classList.add('ativa');
+}
+
+function show(id){ const e=document.getElementById(id); if(e)e.classList.add('show'); }
+function err(id) { const e=document.getElementById(id); if(e)e.classList.add('fc-err'); }
+
+// ════════════════════════════════════════
+//  QR CODE
+// ════════════════════════════════════════
+function buildUrl(treinamentoId){
+  const base = location.href.split('?')[0];
+  return `${base}?inscricao=${treinamentoId}`;
+}
+
+function setupQR(){
+  const el=document.getElementById('qrcode');
+  if(!el) return;
+  el.innerHTML='';
+  const url = buildUrl(S.param);
+  if(typeof QRCode==='undefined'){
+    el.innerHTML='<div style="width:180px;height:180px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.72rem;color:#aaa;text-align:center;padding:10px">QRCode.js<br>não carregou</div>';
+    return;
+  }
+  new QRCode(el,{text:url,width:180,height:180,colorDark:'#1a1a1a',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+}
+
+function copiarLink(){
+  const inp=document.getElementById('url-inp');
+  if(!inp) return;
+  navigator.clipboard.writeText(inp.value).then(()=>toast('Link copiado!')).catch(()=>{inp.select();document.execCommand('copy');toast('Link copiado!');});
+}
+
+// ════════════════════════════════════════
+//  ACTIONS
+// ════════════════════════════════════════
+async function setStatus(id,status){
+  const d=db(), t=d.treinamentos.find(t=>t.id===id);
+  if(!t) return;
+  const g=gestor(); if(!g||g.id!==t.gestorId){ toast('Sem permissão.'); return; }
+  t.status=status; saveDb(d); go('detalhe',id); toast('Status atualizado!');
+
+  // Ao iniciar treinamento → cria subitem no Notion (se configurado)
+  if(status==='andamento'){
+    const notionEp = cfg().notionEndpoint;
+    if(notionEp && t.notionUrl){
+      try {
+        await fetch(notionEp, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            titulo    : t.titulo,
+            data      : t.data,
+            horario   : `${t.horaInicio||''}–${t.horaFim||''}`,
+            local     : t.local||'',
+            instrutor : t.instrutor||'',
+            descricao : t.descricao||'',
+            notionUrl : t.notionUrl,
+            appUrl    : buildUrl(id)
+          })
+        });
+      } catch(e){ console.warn('Notion endpoint error:', e.message); }
+    }
+  }
+}
+
+function confirmarExcluir(id){
+  modal(`<h3>Excluir Treinamento?</h3>
+    <p style="font-size:.87rem;color:#666;margin-top:6px">Esta ação não pode ser desfeita. As presenças também serão removidas.</p>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger btn-sm" onclick="excluir('${id}')">Excluir</button>
+    </div>`);
+}
+
+function excluir(id){
+  const d=db();
+  const t=d.treinamentos.find(t=>t.id===id);
+  if(!t) return;
+  const g=gestor(); if(!g||g.id!==t.gestorId){ toast('Sem permissão.'); closeModal(); return; }
+  d.treinamentos=d.treinamentos.filter(t=>t.id!==id);
+  d.presencas=d.presencas.filter(p=>p.treinamentoId!==id);
+  saveDb(d); closeModal(); toast('Excluído.'); go('dashboard');
+}
+
+function removerPresenca(pid,tid){
+  const d=db();
+  d.presencas=d.presencas.filter(p=>p.id!==pid);
+  saveDb(d); go('detalhe',tid); toast('Presença removida.');
+}
+
+function zoomAssin(pid){
+  const p=db().presencas.find(p=>p.id===pid);
+  if(!p?.assinatura) return;
+  modal(`<h3>${esc(p.nome)}</h3>
+    <img src="${p.assinatura}" style="width:100%;border:1px solid #eee;border-radius:8px;margin-top:8px"/>
+    <div class="m-foot"><button class="btn btn-outline btn-sm" onclick="closeModal()">Fechar</button></div>`);
+}
+
+function exportarCSV(id){
+  const d=db(), t=d.treinamentos.find(t=>t.id===id);
+  const pres=d.presencas.filter(p=>p.treinamentoId===id);
+  if(!pres.length){toast('Sem presenças para exportar.');return;}
+  const rows=[['#','Nome','Matrícula','E-mail','Horário']];
+  pres.forEach((p,i)=>{
+    const hr=p.registradoEm?new Date(p.registradoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'';
+    rows.push([i+1,p.nome,p.matricula||'',p.email||'',hr]);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`presencas_${t?.titulo||id}_${t?.data||''}.csv`;
+  a.click(); toast('CSV exportado!');
+}
+
+// ════════════════════════════════════════
+//  MODAL NOVO GESTOR
+// ════════════════════════════════════════
+function modalNovoGestor(){
+  modal(`<h3>Criar Perfil</h3>
+    <div class="fg"><label class="fl">Nome *</label><input id="m-nome" class="fc" type="text" placeholder="Seu nome completo"/></div>
+    <div class="fg"><label class="fl">Setor / Área</label><input id="m-setor" class="fc" type="text" placeholder="Gestão e Desenvolvimento"/></div>
+    <div class="fg"><label class="fl">E-mail *</label><input id="m-email" class="fc" type="email" placeholder="nome@transmaroni.com.br"/></div>
+    <div class="f-row">
+      <div class="fg"><label class="fl">Senha *</label><input id="m-senha" class="fc" type="password" placeholder="••••••••"/></div>
+      <div class="fg"><label class="fl">Confirmar senha *</label><input id="m-senha2" class="fc" type="password" placeholder="••••••••"/></div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-yellow btn-sm" onclick="criarGestor()">Criar</button>
+    </div>`);
+}
+
+function criarGestor(){
+  const nome  = document.getElementById('m-nome').value.trim();
+  const email = document.getElementById('m-email').value.trim();
+  const senha = document.getElementById('m-senha').value;
+  const senha2= document.getElementById('m-senha2').value;
+  if(!nome) { toast('Informe seu nome.'); return; }
+  if(!email){ toast('Informe seu e-mail.'); return; }
+  if(!senha){ toast('Defina uma senha.'); return; }
+  if(senha !== senha2){ toast('As senhas não coincidem.'); return; }
+  const d=db();
+  const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+  const g={id:uid(), nome, setor:document.getElementById('m-setor').value.trim(), email, senha, admin:isAdmin};
+  d.gestores.push(g); saveDb(d); closeModal();
+  S.gestorId=g.id; go('dashboard');
+}
+
+// ════════════════════════════════════════
+//  VIEW — CONFIGURAÇÕES
+// ════════════════════════════════════════
+function viewConfig(){
+  const c = cfg(), g = gestor();
+  const ativoPresenca = !!c.presencaEndpoint;
+  const ativoOutlook  = !!c.outlookEndpoint;
+  return `
+  ${appBar(g,'Configurações')}
+  <div class="page" style="padding-top:22px;max-width:580px">
+
+    <div class="card">
+      <div class="card-title">📋 Fluxo 1 — Registrar Presença (SharePoint)</div>
+
+      <div style="display:flex;align-items:center;gap:10px;background:${ativoPresenca?'#f0fdf4':'#fffbeb'};border-radius:8px;padding:11px 14px;margin-bottom:16px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${ativoPresenca?'#16a34a':'#f59e0b'};flex-shrink:0"></div>
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:${ativoPresenca?'#15803d':'#92400e'}">${ativoPresenca?'Ativo — presenças vão ao SharePoint':'Não configurado — apenas localStorage'}</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">URL do Fluxo — Registrar Presença</label>
+        <input id="cfg-url" class="fc" type="text" value="${esc(c.presencaEndpoint||'')}" placeholder="https://...powerplatform.com/..."/>
+        <div style="font-size:.72rem;color:#aaa;margin-top:4px">Fluxo "Registrar Presença — App G&D" no Power Automate.</div>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-yellow btn-sm" style="flex:1" onclick="salvarConfig()">Salvar</button>
+        ${ativoPresenca?`<button class="btn btn-dark btn-sm" onclick="testarConexao()">🔗 Testar</button>`:''}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 Fluxo 2 — Criar Invite no Outlook</div>
+
+      <div style="display:flex;align-items:center;gap:10px;background:${ativoOutlook?'#f0fdf4':'#fffbeb'};border-radius:8px;padding:11px 14px;margin-bottom:16px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${ativoOutlook?'#16a34a':'#f59e0b'};flex-shrink:0"></div>
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:${ativoOutlook?'#15803d':'#92400e'}">${ativoOutlook?'Ativo — invite criado ao salvar treinamento':'Não configurado — nenhum invite será criado'}</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">URL do Fluxo — Criar Treinamento Outlook</label>
+        <input id="cfg-outlook" class="fc" type="text" value="${esc(c.outlookEndpoint||'')}" placeholder="https://...powerplatform.com/..."/>
+        <div style="font-size:.72rem;color:#aaa;margin-top:4px">Fluxo "Criar Treinamento — App G&D" no Power Automate (veja instruções abaixo).</div>
+      </div>
+
+      <div style="background:#f8f8f8;border-radius:8px;padding:14px;margin-bottom:14px">
+        <div style="font-size:.78rem;font-weight:700;margin-bottom:8px">Dados enviados ao fluxo:</div>
+        <code style="font-size:.72rem;color:#555;line-height:1.9;display:block">titulo, dataHoraInicio, dataHoraFim,<br>local, instrutor, descricao,<br>gestorNome, gestorEmail</code>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-yellow btn-sm" style="flex:1" onclick="salvarConfig()">Salvar</button>
+        ${ativoOutlook?`<button class="btn btn-dark btn-sm" onclick="testarOutlook()">🔗 Testar</button>`:''}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 Fluxo 3 — Criar Subitem no Notion</div>
+
+      <div style="display:flex;align-items:center;gap:10px;background:${!!c.notionEndpoint?'#f0fdf4':'#fffbeb'};border-radius:8px;padding:11px 14px;margin-bottom:16px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${!!c.notionEndpoint?'#16a34a':'#f59e0b'};flex-shrink:0"></div>
+        <div>
+          <div style="font-size:.82rem;font-weight:700;color:${!!c.notionEndpoint?'#15803d':'#92400e'}">${!!c.notionEndpoint?'Ativo — subitem criado ao iniciar treinamento':'Não configurado'}</div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="fl">URL do Fluxo — Iniciar Treinamento (Notion)</label>
+        <input id="cfg-notion" class="fc" type="text" value="${esc(c.notionEndpoint||'')}" placeholder="https://...powerplatform.com/..."/>
+        <div style="font-size:.72rem;color:#aaa;margin-top:4px">Fluxo "Iniciar Treinamento — App G&D" no Power Automate. Acionado ao clicar "▶️ Iniciar" em um treinamento com URL Notion preenchida.</div>
+      </div>
+
+      <button class="btn btn-yellow btn-sm btn-full" onclick="salvarConfig()">Salvar</button>
+    </div>
+
+    <div style="text-align:center;margin-top:4px">
+      <button class="btn btn-outline btn-sm" onclick="go('dashboard')">← Voltar</button>
+    </div>
+  </div>`;
+}
+
+function salvarConfig(){
+  const url     = document.getElementById('cfg-url')?.value.trim()    || cfg().presencaEndpoint || '';
+  const outlook = document.getElementById('cfg-outlook')?.value.trim() || cfg().outlookEndpoint  || '';
+  const notion  = document.getElementById('cfg-notion')?.value.trim()  || cfg().notionEndpoint   || '';
+  saveCfg({presencaEndpoint: url, outlookEndpoint: outlook, notionEndpoint: notion});
+  toast('Configurações salvas!');
+  go('dashboard');
+}
+
+async function testarOutlook(){
+  const url = cfg().outlookEndpoint;
+  if(!url){ toast('Nenhuma URL configurada.'); return; }
+  toast('Enviando teste ao Outlook...');
+  try {
+    const r = await fetch(url, {
+      method : 'POST',
+      headers: {'Content-Type':'application/json'},
+      body   : JSON.stringify({
+        titulo:'TESTE Treinamento App', dataHoraInicio:'2026-01-15T09:00:00',
+        dataHoraFim:'2026-01-15T10:00:00', local:'Sala Teste', instrutor:'Teste',
+        descricao:'Evento de teste gerado pelo App G&D', gestorNome:'Teste', gestorEmail:'teste@transmaroni.com.br'
+      })
+    });
+    toast(r.ok ? '✅ Conexão OK! Verifique o histórico no Power Automate.' : `⚠️ Resposta ${r.status}`);
+  } catch(e){
+    toast('❌ Erro: ' + (e.message||'sem conexão'));
+  }
+}
+
+async function testarConexao(){
+  const url = cfg().presencaEndpoint;
+  if(!url){ toast('Nenhuma URL configurada.'); return; }
+  toast('Enviando teste ao Power Automate...');
+  try {
+    const r = await fetch(url, {
+      method : 'POST',
+      headers: {'Content-Type':'application/json'},
+      body   : JSON.stringify({_teste:true, treinamento:'TESTE', data:'2026-01-01', nome:'Teste App', matricula:'00000', email:'teste@transmaroni.com.br', timestamp: new Date().toISOString()})
+    });
+    toast(r.ok ? '✅ Conexão OK! Verifique o histórico no Power Automate.' : `⚠️ Resposta ${r.status}`);
+  } catch(e){
+    toast('❌ Erro: ' + (e.message||'sem conexão'));
+  }
+}
+
+// ════════════════════════════════════════
+//  APP BAR
+// ════════════════════════════════════════
+function appBar(g, subtitle){
+  let backView=null, backParam=null, backLabel='← Voltar';
+  if(S.view==='ata'     ){backView='detalhe';backParam=S.param;backLabel='← Detalhes';}
+  else if(S.view==='editar' ){backView='detalhe';backParam=S.param;backLabel='← Detalhes';}
+  else if(S.view==='novo'   ){backView='dashboard';backLabel='← Início';}
+  else if(S.view==='detalhe'){backView='dashboard';backLabel='← Início';}
+  else if(S.view==='config' ){backView='dashboard';backLabel='← Início';}
+  const backHtml = backView
+    ? `<button class="app-bar-back" onclick="go('${backView}'${backParam?`,'${backParam}'`:''})">${backLabel}</button>`
+    : '';
+  return `<div class="app-bar no-print">
+    <div class="app-bar-left">
+      ${backHtml}
+      <div onclick="go('dashboard')" style="cursor:pointer;display:flex;align-items:center;gap:9px">
+        ${LOGO('white','#1a1a1a','30px')}
+        <span class="app-bar-title">${subtitle||'Treinamentos G&D'}</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:4px">
+      ${g?`<button onclick="go('config')" title="Configurações Power Automate" style="background:none;border:none;cursor:pointer;padding:5px 8px;border-radius:6px;font-size:1rem;color:${cfg().presencaEndpoint?'#4ade80':'rgba(255,255,255,.5)'}">⚙️</button>`:''}
+      ${g?`<div class="app-bar-user" onclick="go('login')"><div class="av">${iniciais(g.nome)}</div></div>`:''}
+    </div>
+  </div>`;
+}
+
+// ════════════════════════════════════════
+//  MODAL & TOAST
+// ════════════════════════════════════════
+function modal(html){
+  document.getElementById('modals').innerHTML=`<div class="m-back" onclick="if(event.target===this)closeModal()"><div class="m-box">${html}</div></div>`;
+}
+function closeModal(){ document.getElementById('modals').innerHTML=''; }
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+// ════════════════════════════════════════
+//  INIT — detecta modo (gestor vs. participante)
+// ════════════════════════════════════════
+const urlParams = new URLSearchParams(location.search);
+const inscricaoId = urlParams.get('inscricao');
+
+if(inscricaoId){
+  viewInscricao(inscricaoId);
+} else {
+  render();
+}
+
+// Atualiza detalhe em tempo real quando outra aba registra presença
+window.addEventListener('storage', e => {
+  if(e.key===DB_KEY && S.view==='detalhe') { render(); }
+});
+</script>
+</body>
+</html>
