@@ -1200,22 +1200,28 @@ async function setStatus(id,status){
   // Ao iniciar treinamento → cria subitem no Notion (se configurado)
   if(status==='andamento'){
     const notionEp = cfg().notionEndpoint;
-    if(notionEp && t.notionUrl){
-      try {
-        await fetch(notionEp, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            titulo    : t.titulo,
-            data      : t.data,
-            horario   : `${t.horaInicio||''}–${t.horaFim||''}`,
-            local     : t.local||'',
-            instrutor : t.instrutor||'',
-            descricao : t.descricao||'',
-            notionUrl : t.notionUrl,
-            appUrl    : buildUrl(id)
-          })
-        });
-      } catch(e){ console.warn('Notion endpoint error:', e.message); }
+    if(!notionEp){ toast('⚠️ Notion: endpoint não configurado.'); return; }
+    if(!t.notionUrl){ toast('⚠️ Notion: treinamento sem link do Notion.'); return; }
+    try {
+      toast('⏳ Criando subitem no Notion...');
+      const r = await fetch(notionEp, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          titulo    : t.titulo,
+          data      : t.data,
+          horario   : `${t.horaInicio||''}–${t.horaFim||''}`,
+          local     : t.local||'',
+          instrutor : t.instrutor||'',
+          descricao : t.descricao||'',
+          notionUrl : t.notionUrl,
+          appUrl    : buildUrl(id)
+        })
+      });
+      if(r.ok) toast('✅ Subitem criado no Notion!');
+      else toast('⚠️ Notion: fluxo respondeu ' + r.status);
+    } catch(e){
+      toast('⚠️ Notion falhou: ' + (e.message||'erro de rede'));
+      console.warn('Notion endpoint error:', e);
     }
   }
 }
