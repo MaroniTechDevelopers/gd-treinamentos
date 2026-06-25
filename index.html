@@ -1223,9 +1223,10 @@ async function setStatus(id,status){
           appUrl    : buildUrl(id)
         })
       });
-      modal(`<h3>${r.ok?'✅ Subitem criado no Notion!':'⚠️ Notion respondeu '+r.status}</h3><p style="font-size:.82rem;color:#666">Status HTTP: ${r.status}<br>Notion URL: ${esc(t.notionUrl)}</p><div class="m-foot"><button class="btn btn-yellow btn-sm" onclick="closeModal()">OK</button></div>`);
+      if(r.ok) toast('✅ Subitem criado no Notion!');
+      else toast('⚠️ Notion respondeu: ' + r.status);
     } catch(e){
-      modal(`<h3>⚠️ Erro ao chamar Notion</h3><p style="font-size:.82rem;color:#666">${esc(e.message||'erro de rede')}<br><br>Notion URL: ${esc(t.notionUrl)}</p><div class="m-foot"><button class="btn btn-outline btn-sm" onclick="closeModal()">OK</button></div>`);
+      toast('⚠️ Notion falhou: ' + (e.message||'erro de rede'));
       console.warn('Notion endpoint error:', e);
     }
   }
