@@ -1147,7 +1147,7 @@ async function confirmarPresenca(treinamentoId){
         headers: {'Content-Type':'application/json'},
         body   : JSON.stringify({
           treinamento: t?.titulo   || '',
-          data       : t?.data     || '',
+          data       : t?.data     || new Date().toISOString().slice(0,10),
           horario    : `${t?.horaInicio||''}–${t?.horaFim||''}`,
           local      : t?.local    || '',
           instrutor  : t?.instrutor|| '',
