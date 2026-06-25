@@ -685,10 +685,10 @@ async function salvarTreinamento(id){
     const nt = {id:uid(), gestorId:gestor().id, status:'agendado', criadoEm:new Date().toISOString(), ...obj};
     d.treinamentos.push(nt); saveDb(d);
 
-    // Cria invite no Outlook via Power Automate (se configurado)
+    // Cria invite no Outlook via Power Automate (só para admins — fluxo roda na conta do Willian)
     const outlookUrl = cfg().outlookEndpoint;
-    if(outlookUrl){
-      const g = gestor();
+    const g = gestor();
+    if(outlookUrl && g?.admin){
       try {
         await fetch(outlookUrl, {
           method : 'POST',
