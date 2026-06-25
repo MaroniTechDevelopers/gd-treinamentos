@@ -200,6 +200,7 @@ hr{border:none;border-top:1px solid #f3f4f6;margin:14px 0}
   .card{box-shadow:none;border:1px solid #e5e7eb}
   .app-bar{display:none}
   .fab{display:none}
+  #ata-transcricao{border:1px solid #e5e7eb!important;min-height:0!important;cursor:default!important;outline:none!important}
 }
 </style>
 </head>
@@ -808,10 +809,11 @@ function viewDetalhe(id){
 //  VIEW — ATA
 // ════════════════════════════════════════
 function viewAta(id){
-  const d = db();
+  const d = dbEnsure(db());
   const t = d.treinamentos.find(t=>t.id===id);
   if(!t){ go('dashboard'); return ''; }
   const g = d.gestores.find(g=>g.id===t.gestorId);
+  const ataSalva = d.atas.find(a=>a.treinamentoId===id);
   const pres = d.presencas.filter(p=>p.treinamentoId===id).sort((a,b)=>a.registradoEm.localeCompare(b.registradoEm));
   const tdLbl = `padding:9px 13px;border:1px solid #e5e7eb;font-weight:700;color:#6b7280;font-size:.71rem;text-transform:uppercase;letter-spacing:.05em;background:#f9fafb;white-space:nowrap`;
   const tdVal = `padding:9px 13px;border:1px solid #e5e7eb;color:#111827;font-size:.88rem`;
@@ -821,7 +823,7 @@ function viewAta(id){
     <div class="flex gap-2">
       <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="go('detalhe','${id}')">← Voltar</button>
       <button class="btn btn-dark btn-sm" onclick="salvarAta('${id}')">💾 Salvar Ata</button>
-      <button class="btn btn-yellow btn-sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      <button class="btn btn-yellow btn-sm" onclick="prepararImpressao()">🖨️ Imprimir / PDF</button>
     </div>
   </div>
   <div style="max-width:800px;margin:24px auto;padding:0 16px 40px">
@@ -900,6 +902,16 @@ function viewAta(id){
         <div style="min-height:70px;border:1px solid #e5e7eb;border-radius:8px;padding:13px;font-size:.87rem;color:#374151;line-height:1.7;white-space:pre-line">${t.descricao?esc(t.descricao):'&nbsp;'}</div>
       </div>
 
+      <!-- ── TRANSCRIÇÃO ── -->
+      <div style="margin-bottom:24px" id="ata-transcricao-wrap">
+        <div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:8px">Transcrição do Treinamento</div>
+        <div id="ata-transcricao" contenteditable="true"
+          style="min-height:160px;border:2px dashed #d1d5db;border-radius:8px;padding:13px;font-size:.87rem;color:#374151;line-height:1.7;white-space:pre-wrap;outline:none;cursor:text"
+          onpaste="event.preventDefault();const t=(event.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t)"
+        ></div>
+        <div style="font-size:.72rem;color:#9ca3af;margin-top:5px" class="no-print">Cole aqui a transcrição do Notion · clique em 💾 Salvar Ata para guardar</div>
+      </div>
+
       <!-- ── ASSINATURAS ── -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;padding-top:16px;border-top:1px solid #f3f4f6">
         ${assinBox('Instrutor / Facilitador',t.instrutor||'')}
@@ -919,19 +931,32 @@ function setupAtaQR(){
   if(!el || typeof QRCode==='undefined') return;
   el.innerHTML='';
   new QRCode(el,{text:buildUrl(S.param),width:120,height:120,colorDark:'#111827',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  const ataSalva = dbEnsure(db()).atas.find(a=>a.treinamentoId===S.param);
+  const tr = document.getElementById('ata-transcricao');
+  if(tr && ataSalva?.transcricao) tr.textContent = ataSalva.transcricao;
+}
+
+function prepararImpressao(){
+  const wrap = document.getElementById('ata-transcricao-wrap');
+  const tr = document.getElementById('ata-transcricao');
+  const vazio = wrap && tr && !tr.innerText.trim();
+  if(vazio) wrap.style.display = 'none';
+  window.print();
+  if(vazio) wrap.style.display = '';
 }
 
 function assinBox(l,n){ return `<div><div class="assin-linha"></div><div style="font-size:.71rem;color:#6b7280;margin-top:4px">${l}</div><div style="font-size:.82rem;font-weight:700;margin-top:2px">${esc(n)}</div></div>`; }
 
 function salvarAta(treinamentoId){
   const d = dbEnsure(db());
+  const transcricao = document.getElementById('ata-transcricao')?.innerText?.trim()||'';
   const jaExiste = d.atas.find(a=>a.treinamentoId===treinamentoId);
   if(jaExiste){
-    // Atualiza timestamp da última geração
     jaExiste.geradaEm = new Date().toISOString();
+    jaExiste.transcricao = transcricao;
     saveDb(d); toast('Ata atualizada!'); return;
   }
-  d.atas.push({id:uid(), treinamentoId, geradaEm:new Date().toISOString()});
+  d.atas.push({id:uid(), treinamentoId, geradaEm:new Date().toISOString(), transcricao});
   saveDb(d); toast('✅ Ata salva!');
 }
 
