@@ -955,7 +955,12 @@ function salvarAta(treinamentoId){
 // ════════════════════════════════════════
 function viewInscricao(id){
   const d = db();
-  const t = d.treinamentos.find(t=>t.id===id);
+  let t = d.treinamentos.find(t=>t.id===id);
+  if(!t){
+    const p = new URLSearchParams(location.search);
+    const tt = p.get('tt');
+    if(tt) t = { id, titulo:tt, data:p.get('td')||'', horaInicio:p.get('thi')||'', horaFim:p.get('thf')||'', local:p.get('tl')||'', instrutor:p.get('ti')||'' };
+  }
   if(!t){
     document.getElementById('root').innerHTML = `
       <div class="ins-header">
@@ -1167,7 +1172,17 @@ function err(id) { const e=document.getElementById(id); if(e)e.classList.add('fc
 // ════════════════════════════════════════
 function buildUrl(treinamentoId){
   const base = location.href.split('?')[0];
-  return `${base}?inscricao=${treinamentoId}`;
+  const t = db().treinamentos.find(t=>t.id===treinamentoId);
+  const p = new URLSearchParams({inscricao: treinamentoId});
+  if(t){
+    p.set('tt', t.titulo||'');
+    if(t.data)       p.set('td', t.data);
+    if(t.horaInicio) p.set('thi', t.horaInicio);
+    if(t.horaFim)    p.set('thf', t.horaFim);
+    if(t.local)      p.set('tl', t.local);
+    if(t.instrutor)  p.set('ti', t.instrutor);
+  }
+  return `${base}?${p.toString()}`;
 }
 
 function setupQR(){
