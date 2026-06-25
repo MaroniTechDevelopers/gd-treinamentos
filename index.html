@@ -685,33 +685,18 @@ async function salvarTreinamento(id){
     const nt = {id:uid(), gestorId:gestor().id, status:'agendado', criadoEm:new Date().toISOString(), ...obj};
     d.treinamentos.push(nt); saveDb(d);
 
-    // Cria invite no Outlook via Power Automate (só para admins — fluxo roda na conta do Willian)
-    const outlookUrl = cfg().outlookEndpoint;
-    const g = gestor();
-    if(outlookUrl && g?.admin){
-      try {
-        await fetch(outlookUrl, {
-          method : 'POST',
-          headers: {'Content-Type':'application/json'},
-          body   : JSON.stringify({
-            titulo     : obj.titulo,
-            dataHoraInicio: `${obj.data}T${obj.horaInicio||'08:00'}:00`,
-            dataHoraFim   : `${obj.data}T${obj.horaFim  ||'09:00'}:00`,
-            local      : obj.local     || '',
-            instrutor  : obj.instrutor || '',
-            descricao  : obj.descricao || '',
-            gestorNome : g?.nome  || '',
-            gestorEmail: g?.email || ''
-          })
-        });
-        toast('✅ Treinamento criado e invite enviado ao Outlook!');
-      } catch(e){
-        toast('Treinamento criado. ⚠️ Invite Outlook falhou — verifique a URL.');
-        console.warn('Outlook endpoint error:', e.message);
-      }
-    } else {
-      toast('Treinamento criado!');
-    }
+    // Abre Outlook Web com evento pré-preenchido — cada gestor salva no próprio calendário
+    toast('Treinamento criado! Abrindo Outlook para adicionar ao calendário...');
+    const startDt = `${obj.data}T${obj.horaInicio||'08:00'}:00`;
+    const endDt   = `${obj.data}T${obj.horaFim  ||'09:00'}:00`;
+    const corpo   = [obj.instrutor?`Instrutor: ${obj.instrutor}`:'', obj.descricao||''].filter(Boolean).join('\n');
+    const outlookComposeUrl = 'https://outlook.office.com/calendar/action/compose?'
+      + `subject=${encodeURIComponent(obj.titulo)}`
+      + `&startdt=${encodeURIComponent(startDt)}`
+      + `&enddt=${encodeURIComponent(endDt)}`
+      + (obj.local    ? `&location=${encodeURIComponent(obj.local)}`  : '')
+      + (corpo        ? `&body=${encodeURIComponent(corpo)}`           : '');
+    window.open(outlookComposeUrl, '_blank');
     go('detalhe', nt.id);
   }
 }
