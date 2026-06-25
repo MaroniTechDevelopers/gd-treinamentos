@@ -1200,10 +1200,16 @@ async function setStatus(id,status){
   // Ao iniciar treinamento → cria subitem no Notion (se configurado)
   if(status==='andamento'){
     const notionEp = cfg().notionEndpoint;
-    if(!notionEp){ toast('⚠️ Notion: endpoint não configurado.'); return; }
-    if(!t.notionUrl){ toast('⚠️ Notion: treinamento sem link do Notion.'); return; }
+    if(!notionEp){
+      modal(`<h3>⚠️ Notion</h3><p>Endpoint não configurado.</p><div class="m-foot"><button class="btn btn-outline btn-sm" onclick="closeModal()">OK</button></div>`);
+      return;
+    }
+    if(!t.notionUrl){
+      modal(`<h3>⚠️ Notion</h3><p>Este treinamento não tem "Link do Notion" preenchido.</p><div class="m-foot"><button class="btn btn-outline btn-sm" onclick="closeModal()">OK</button></div>`);
+      return;
+    }
+    toast('⏳ Criando subitem no Notion...');
     try {
-      toast('⏳ Criando subitem no Notion...');
       const r = await fetch(notionEp, {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -1217,10 +1223,9 @@ async function setStatus(id,status){
           appUrl    : buildUrl(id)
         })
       });
-      if(r.ok) toast('✅ Subitem criado no Notion!');
-      else toast('⚠️ Notion: fluxo respondeu ' + r.status);
+      modal(`<h3>${r.ok?'✅ Subitem criado no Notion!':'⚠️ Notion respondeu '+r.status}</h3><p style="font-size:.82rem;color:#666">Status HTTP: ${r.status}<br>Notion URL: ${esc(t.notionUrl)}</p><div class="m-foot"><button class="btn btn-yellow btn-sm" onclick="closeModal()">OK</button></div>`);
     } catch(e){
-      toast('⚠️ Notion falhou: ' + (e.message||'erro de rede'));
+      modal(`<h3>⚠️ Erro ao chamar Notion</h3><p style="font-size:.82rem;color:#666">${esc(e.message||'erro de rede')}<br><br>Notion URL: ${esc(t.notionUrl)}</p><div class="m-foot"><button class="btn btn-outline btn-sm" onclick="closeModal()">OK</button></div>`);
       console.warn('Notion endpoint error:', e);
     }
   }
