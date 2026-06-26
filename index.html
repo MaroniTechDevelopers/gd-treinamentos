@@ -866,7 +866,7 @@ function viewAta(id){
   <div style="background:#111827;padding:12px 20px;display:flex;align-items:center;justify-content:space-between" class="no-print">
     <img src="${_LOGO_SRC}" style="height:32px" alt="Grupo Maroni"/>
     <div class="flex gap-2">
-      <button class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="go('detalhe','${id}')">← Voltar</button>
+      <button class="btn btn-sm no-print" style="background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:9px" onclick="go('detalhe','${id}')">← Voltar</button>
       <button class="btn btn-dark btn-sm" onclick="salvarAta('${id}')">💾 Salvar Ata</button>
       <button class="btn btn-yellow btn-sm" onclick="prepararImpressao()">🖨️ Imprimir / PDF</button>
     </div>
