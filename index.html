@@ -542,11 +542,18 @@ function adminListaHtml(lista, d){
     const atrasadoTag = atrasado
       ? `<span style="font-size:.67rem;font-weight:700;color:#dc2626;background:#fee2e2;padding:2px 8px;border-radius:20px">🔴 Atrasado</span>`
       : '';
-    const ataBtn = `<button onclick="event.stopPropagation();go('ata','${t.id}')"
-        style="background:${temAta?'#d1fae5':'#fef9c3'};border:none;cursor:pointer;padding:5px 11px;border-radius:7px;font-size:.75rem;font-weight:600;color:${temAta?'#065f46':'#92400e'};font-family:inherit;transition:opacity .15s"
-        onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
-        📄 ${temAta?'Ver Ata':'Gerar Ata'}
-      </button>`;
+    const podeAta = t.status==='encerrado';
+    const ataBtn = podeAta
+      ? `<button onclick="event.stopPropagation();go('ata','${t.id}')"
+          style="background:${temAta?'#d1fae5':'#fef9c3'};border:none;cursor:pointer;padding:5px 11px;border-radius:7px;font-size:.75rem;font-weight:600;color:${temAta?'#065f46':'#92400e'};font-family:inherit;transition:opacity .15s"
+          onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+          📄 ${temAta?'Ver Ata':'Gerar Ata'}
+        </button>`
+      : `<button onclick="event.stopPropagation();toast('⚠️ Encerre o treinamento para gerar a ata.')"
+          style="background:#f3f4f6;border:none;cursor:not-allowed;padding:5px 11px;border-radius:7px;font-size:.75rem;font-weight:600;color:#9ca3af;font-family:inherit;opacity:.55"
+          title="Disponível após encerrar o treinamento">
+          📄 Gerar Ata
+        </button>`;
     const presBtn = `<button onclick="event.stopPropagation();go('detalhe','${t.id}')"
         style="background:#f3f4f6;border:none;cursor:pointer;padding:5px 11px;border-radius:7px;font-size:.75rem;font-weight:600;color:#374151;font-family:inherit;transition:opacity .15s"
         onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
@@ -609,6 +616,7 @@ function viewForm(id){
   const t = id ? d.treinamentos.find(t=>t.id===id) : null;
   const g = gestor();
   const hoje = new Date().toISOString().slice(0,10);
+  const convidadosTexto = esc((t?.convidados||[]).map(c=>c.email&&c.nome&&c.nome!==c.email.split('@')[0]?c.nome+' <'+c.email+'>':c.email||c.nome).join('\n'));
   return `
   ${appBar(g, id?'Editar Treinamento':'Novo Treinamento')}
   <div class="page" style="padding-top:22px;max-width:580px">
@@ -653,6 +661,11 @@ function viewForm(id){
         <input id="f-notion" class="fc" type="url" placeholder="https://notion.so/..." value="${esc(t?.notionUrl||'')}"/>
         <div style="font-size:.72rem;color:#aaa;margin-top:3px">Cole a URL do projeto Notion relacionado. Ao iniciar o treinamento, um subitem será criado automaticamente.</div>
       </div>
+      <div class="fg">
+        <label class="fl">👥 Colaboradores Convidados <span style="font-weight:400;color:#9ca3af;font-size:.8rem">(um por linha — Nome ou email@empresa.com)</span></label>
+        <textarea id="f-convidados" class="fc" rows="4" placeholder="João Silva&#10;maria@transmaroni.com.br&#10;Pedro Santos - pedro@transmaroni.com.br">${convidadosTexto}</textarea>
+        <div style="font-size:.72rem;color:#aaa;margin-top:3px">Convidados do invite do Outlook. Serão comparados com a lista de presença na ATA.</div>
+      </div>
       <div style="display:flex;gap:10px;margin-top:6px">
         <button class="btn btn-outline" onclick="go('dashboard')">Cancelar</button>
         <button class="btn btn-yellow" style="flex:1" onclick="salvarTreinamento(${id?`'${id}'`:'null'})">${id?'Salvar':'Criar Treinamento'}</button>
@@ -669,6 +682,14 @@ async function salvarTreinamento(id){
   if(!data){   document.getElementById('e-data').classList.add('show');   document.getElementById('f-data').classList.add('fc-err');   ok=false; }
   if(!ok) return;
   const d = db();
+  const convidadosRaw = document.getElementById('f-convidados').value.trim();
+  const convidados = convidadosRaw ? convidadosRaw.split('\n').map(l=>{
+    l=l.trim(); if(!l) return null;
+    const em = l.match(/[\w.+\-]+@[\w\-]+\.[a-z.]{2,}/i);
+    const email = em ? em[0] : '';
+    const nome = l.replace(/<[^>]*>/g,'').replace(email,'').replace(/^[\s\-<>()]+|[\s\-<>()]+$/g,'').trim() || (email?email.split('@')[0]:l);
+    return {nome, email};
+  }).filter(Boolean) : [];
   const obj = {
     titulo,data,
     local:      document.getElementById('f-local').value.trim(),
@@ -676,7 +697,8 @@ async function salvarTreinamento(id){
     horaFim:    document.getElementById('f-fim').value,
     instrutor:  document.getElementById('f-instrutor').value.trim(),
     descricao:  document.getElementById('f-descricao').value.trim(),
-    notionUrl:  document.getElementById('f-notion').value.trim()
+    notionUrl:  document.getElementById('f-notion').value.trim(),
+    convidados
   };
   if(id){
     const i = d.treinamentos.findIndex(t=>t.id===id);
@@ -690,13 +712,16 @@ async function salvarTreinamento(id){
     toast('Treinamento criado! Abrindo Outlook para adicionar ao calendário...');
     const startDt = `${obj.data}T${obj.horaInicio||'08:00'}:00`;
     const endDt   = `${obj.data}T${obj.horaFim  ||'09:00'}:00`;
-    const corpo   = [obj.instrutor?`Instrutor: ${obj.instrutor}`:'', obj.descricao||''].filter(Boolean).join('\n');
+    const emails = convidados.filter(c=>c.email).map(c=>c.email).join(',');
+    const convLista = convidados.length ? '\n\n👥 Convidados:\n' + convidados.map(c=>c.email ? c.nome+' ('+c.email+')' : c.nome).join('\n') : '';
+    const corpo = [obj.instrutor ? 'Instrutor: '+obj.instrutor : '', obj.descricao||'', convLista].filter(Boolean).join('\n');
     const outlookComposeUrl = 'https://outlook.office.com/calendar/action/compose?'
-      + `subject=${encodeURIComponent(obj.titulo)}`
-      + `&startdt=${encodeURIComponent(startDt)}`
-      + `&enddt=${encodeURIComponent(endDt)}`
-      + (obj.local    ? `&location=${encodeURIComponent(obj.local)}`  : '')
-      + (corpo        ? `&body=${encodeURIComponent(corpo)}`           : '');
+      + 'subject=' + encodeURIComponent(obj.titulo)
+      + '&startdt=' + encodeURIComponent(startDt)
+      + '&enddt='   + encodeURIComponent(endDt)
+      + (obj.local ? '&location=' + encodeURIComponent(obj.local) : '')
+      + (emails    ? '&to='       + encodeURIComponent(emails)    : '')
+      + (corpo     ? '&body='     + encodeURIComponent(corpo)     : '');
     window.open(outlookComposeUrl, '_blank');
     go('detalhe', nt.id);
   }
@@ -713,6 +738,9 @@ function viewDetalhe(id){
   const isOwner = g && g.id === t.gestorId;
   const presencas = d.presencas.filter(p=>p.treinamentoId===id).sort((a,b)=>a.registradoEm.localeCompare(b.registradoEm));
   const url = buildUrl(id);
+  const ataBtnDetalhe = t.status==='encerrado'
+    ? '<button class="btn btn-yellow btn-sm" onclick="go(\'ata\',\''+id+'\')">📄 Gerar Ata</button>'
+    : '<button class="btn btn-outline btn-sm" style="opacity:.45;cursor:not-allowed" onclick="toast(\'⚠️ Encerre o treinamento para gerar a ata.\')">📄 Gerar Ata</button>';
   return `
   ${appBar(g)}
   <div class="page" style="padding-top:18px">
@@ -735,7 +763,7 @@ function viewDetalhe(id){
         ${isOwner&&t.status!=='andamento'?`<button class="btn btn-outline btn-sm" onclick="setStatus('${id}','andamento')">▶️ Iniciar</button>`:''}
         ${isOwner&&t.status!=='encerrado'?`<button class="btn btn-outline btn-sm" onclick="setStatus('${id}','encerrado')">✅ Encerrar</button>`:''}
         ${isOwner&&t.status==='andamento'&&t.notionUrl?`<a class="btn btn-dark btn-sm" href="${esc(t.notionUrl)}" target="_blank">📝 Transcrever no Notion</a>`:''}
-        <button class="btn btn-yellow btn-sm" onclick="go('ata','${id}')">📄 Gerar Ata</button>
+        ${ataBtnDetalhe}
         ${isOwner?`<button class="btn btn-danger btn-sm" onclick="confirmarExcluir('${id}')">🗑️</button>`:''}
       </div>
     </div>
@@ -812,9 +840,24 @@ function viewAta(id){
   const d = dbEnsure(db());
   const t = d.treinamentos.find(t=>t.id===id);
   if(!t){ go('dashboard'); return ''; }
+  if(t.status!=='encerrado'){
+    setTimeout(()=>{ toast('⚠️ Encerre o treinamento antes de gerar a ata.'); go('detalhe',id); },50);
+    return '';
+  }
   const g = d.gestores.find(g=>g.id===t.gestorId);
   const ataSalva = d.atas.find(a=>a.treinamentoId===id);
   const pres = d.presencas.filter(p=>p.treinamentoId===id).sort((a,b)=>a.registradoEm.localeCompare(b.registradoEm));
+  const convidados = t.convidados||[];
+  const _norm = s=>(s||'').toLowerCase().trim().replace(/\s+/g,' ');
+  const _match = c=>{ if(c.email){const m=pres.find(p=>p.email&&p.email.toLowerCase()===c.email.toLowerCase());if(m)return m;} return pres.find(p=>_norm(p.nome)===_norm(c.nome))||null; };
+  const _seen = new Set();
+  const linhas = convidados.length>0 ? [
+    ...convidados.map((c,i)=>{ const p=_match(c); if(p)_seen.add(p.id); return {i:i+1,nome:c.nome||c.email,mat:p?.matricula||'—',presente:!!p,assin:p?.assinatura||null,extra:false}; }),
+    ...pres.filter(p=>!_seen.has(p.id)).map((p,j)=>({i:convidados.length+j+1,nome:p.nome,mat:p.matricula||'—',presente:true,assin:p.assinatura||null,extra:true}))
+  ] : pres.map((p,i)=>({i:i+1,nome:p.nome,mat:p.matricula||'—',presente:true,assin:p.assinatura||null,extra:false}));
+  const nPres = linhas.filter(l=>l.presente).length;
+  const nAus  = linhas.filter(l=>!l.presente).length;
+  const pct   = convidados.length>0 ? Math.round(nPres/convidados.length*100) : 100;
   const tdLbl = `padding:9px 13px;border:1px solid #e5e7eb;font-weight:700;color:#6b7280;font-size:.71rem;text-transform:uppercase;letter-spacing:.05em;background:#f9fafb;white-space:nowrap`;
   const tdVal = `padding:9px 13px;border:1px solid #e5e7eb;color:#111827;font-size:.88rem`;
   return `
@@ -861,7 +904,7 @@ function viewAta(id){
           <td style="${tdLbl}">Gestor</td>
           <td style="${tdVal}">${esc(g?.nome||'—')}</td>
           <td style="${tdLbl}">Presentes</td>
-          <td style="${tdVal};font-weight:700;color:#059669">${pres.length}</td>
+          <td style="${tdVal};font-weight:700;color:#059669">${nPres}${convidados.length>0?' / '+convidados.length+' ('+pct+'%)':''}</td>
         </tr>
       </table>
 
@@ -873,24 +916,28 @@ function viewAta(id){
           <div style="font-size:.63rem;color:#9ca3af;margin-top:6px;max-width:120px;line-height:1.4">Escaneie para confirmar presença</div>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280;margin-bottom:8px">Participantes</div>
-          ${pres.length===0 ? `<div style="padding:24px;text-align:center;border:1px solid #e5e7eb;border-radius:8px;color:#d1d5db;font-size:.85rem">Nenhuma presença registrada.</div>` : `
+          <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+            <div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#6b7280">${convidados.length>0?'Conferência de Presença':'Participantes'}</div>
+            ${convidados.length>0?'<div style="font-size:.72rem;font-weight:600"><span style="color:#059669">'+nPres+' presente'+(nPres!==1?'s':'')+'</span>'+(nAus>0?' &nbsp;·&nbsp; <span style="color:#dc2626">'+nAus+' ausente'+(nAus>1?'s':'')+'</span>':'')+'&nbsp;·&nbsp; '+pct+'%</div>':''}
+          </div>
+          ${linhas.length===0 ? `<div style="padding:24px;text-align:center;border:1px solid #e5e7eb;border-radius:8px;color:#d1d5db;font-size:.85rem">Nenhuma presença registrada.</div>` : `
           <table style="width:100%;border-collapse:collapse;font-size:.82rem">
             <thead>
               <tr style="background:#111827">
                 <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:36px">Nº</th>
                 <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:left;width:80px">Matrícula</th>
                 <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:left">Nome do Colaborador</th>
-                <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:110px">Confirmação de Presença</th>
+                ${convidados.length>0?'<th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:90px">Presença</th>':''}
+                <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:110px">Confirmação</th>
               </tr>
             </thead>
             <tbody>
-              ${pres.map((p,i)=>`<tr style="${i%2===0?'background:#f9fafb':'background:#fff'}">
-                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center;color:#9ca3af;font-size:.75rem">${i+1}</td>
-                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;color:#374151">${esc(p.matricula||'—')}</td>
-                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827">${esc(p.nome)}</td>
-                <td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center">${p.assinatura?`<img style="width:88px;height:30px;object-fit:contain" src="${p.assinatura}"/>`:'—'}</td>
-              </tr>`).join('')}
+              ${linhas.map(function(l){
+                const bg=l.i%2===0?'background:#f9fafb':'background:#fff';
+                const statusCell=convidados.length>0?'<td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center">'+(l.presente?'<span style="color:#059669;font-weight:700;font-size:.75rem">✅ PRESENTE</span>':'<span style="color:#dc2626;font-weight:700;font-size:.75rem">❌ AUSENTE</span>')+'</td>':'';
+                const assinCell='<td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center">'+(l.assin?'<img style="width:88px;height:30px;object-fit:contain" src="'+l.assin+'"/>':'—')+'</td>';
+                return '<tr style="'+bg+(!l.presente?';opacity:.75':'')+'"><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center;color:#9ca3af;font-size:.75rem">'+l.i+'</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;color:#374151">'+esc(l.mat)+'</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827">'+esc(l.nome)+(l.extra?'&nbsp;<span style="font-size:.65rem;font-weight:400;color:#9ca3af">(não convidado)</span>':'')+'</td>'+statusCell+assinCell+'</tr>';
+              }).join('')}
             </tbody>
           </table>`}
         </div>
