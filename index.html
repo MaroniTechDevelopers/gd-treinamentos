@@ -218,11 +218,12 @@ hr{border:none;border-top:1px solid #f3f4f6;margin:14px 0}
 const DB_KEY  = 'gd_treinamentos_v3';
 const CFG_KEY = 'gd_config_v1';
 const _DEFAULT_CFG = {
-  presencaEndpoint: 'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a83dde8e173b44408529c8b633301dcf/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=VPCWLe_N2U2JZqb9A4pjGzlu6Ddw-G-6lZoi9Wt8AF0',
-  outlookEndpoint:  'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2885f399a9074c1b9dae4b002b7be2c5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZbGtKIoeMOfPwd7KtD-OtvuP2aN7Ls_iBX5Rrk4IwgA',
-  notionEndpoint:   'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/af9c58dedff346e0b25544328cc3e307/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=G4ZUzAnQjrXwIDQxlYleyZ-XdslwIrWaC68IFUjXNY8'
+  presencaEndpoint:   'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/a83dde8e173b44408529c8b633301dcf/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=VPCWLe_N2U2JZqb9A4pjGzlu6Ddw-G-6lZoi9Wt8AF0',
+  outlookEndpoint:    'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/2885f399a9074c1b9dae4b002b7be2c5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZbGtKIoeMOfPwd7KtD-OtvuP2aN7Ls_iBX5Rrk4IwgA',
+  notionEndpoint:     'https://default8babaf2b248f465198d61e5312fbe0.0a.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/af9c58dedff346e0b25544328cc3e307/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=G4ZUzAnQjrXwIDQxlYleyZ-XdslwIrWaC68IFUjXNY8',
+  buscaPresencaEndpoint: ''
 };
-function cfg(){ try{ const s=JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); return { presencaEndpoint: s.presencaEndpoint||_DEFAULT_CFG.presencaEndpoint, outlookEndpoint: s.outlookEndpoint||_DEFAULT_CFG.outlookEndpoint, notionEndpoint: s.notionEndpoint||_DEFAULT_CFG.notionEndpoint }; }catch(e){ return {..._DEFAULT_CFG}; } }
+function cfg(){ try{ const s=JSON.parse(localStorage.getItem(CFG_KEY)||'{}'); return { presencaEndpoint: s.presencaEndpoint||_DEFAULT_CFG.presencaEndpoint, outlookEndpoint: s.outlookEndpoint||_DEFAULT_CFG.outlookEndpoint, notionEndpoint: s.notionEndpoint||_DEFAULT_CFG.notionEndpoint, buscaPresencaEndpoint: s.buscaPresencaEndpoint||_DEFAULT_CFG.buscaPresencaEndpoint }; }catch(e){ return {..._DEFAULT_CFG}; } }
 function saveCfg(c){ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
 
 function db(){
@@ -789,7 +790,8 @@ function viewDetalhe(id){
         Presenças
         <span style="background:#f5c800;color:#1a1a1a;padding:2px 10px;border-radius:99px;font-size:.82rem;margin-left:6px">${presencas.length}</span>
       </h2>
-      <button class="btn btn-outline btn-sm" onclick="render()">🔄 Atualizar</button>
+      <button class="btn btn-outline btn-sm" onclick="render()">🔄 Local</button>
+      <button class="btn btn-dark btn-sm" onclick="sincronizarPresencas('${id}')">☁️ Sincronizar SharePoint</button>
     </div>
     ${presencas.length===0 ? `
       <div class="empty" style="padding:28px">
@@ -994,6 +996,35 @@ function prepararImpressao(){
 
 function assinBox(l,n){ return `<div><div class="assin-linha"></div><div style="font-size:.71rem;color:#6b7280;margin-top:4px">${l}</div><div style="font-size:.82rem;font-weight:700;margin-top:2px">${esc(n)}</div></div>`; }
 
+async function sincronizarPresencas(treinamentoId){
+  const ep = cfg().buscaPresencaEndpoint;
+  if(!ep){ toast('⚠️ Configure a URL do Fluxo 5 em ⚙️ Configurações.'); return; }
+  toast('⏳ Sincronizando do SharePoint...');
+  try {
+    const r = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({treinamentoId}) });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data = await r.json();
+    const lista = data.presencas||[];
+    const d = db();
+    let novos = 0;
+    lista.forEach(p=>{
+      const jaExiste = d.presencas.some(lp=>
+        lp.treinamentoId===treinamentoId &&
+        ((lp.matricula&&lp.matricula===p.matricula)||(lp.nome&&lp.nome.toLowerCase()===p.nome.toLowerCase()))
+      );
+      if(!jaExiste){
+        d.presencas.push({ id:uid(), treinamentoId, nome:p.nome||'', matricula:p.matricula||'', email:p.email||'', assinatura:p.assinatura||null, registradoEm:p.timestamp||new Date().toISOString() });
+        novos++;
+      }
+    });
+    saveDb(d);
+    toast('✅ '+lista.length+' presenças no SharePoint · '+novos+' novas importadas');
+    go('detalhe', treinamentoId);
+  } catch(e){
+    toast('❌ Erro ao sincronizar: '+(e.message||'sem conexão'));
+  }
+}
+
 function salvarAta(treinamentoId){
   const d = dbEnsure(db());
   const transcricao = document.getElementById('ata-transcricao')?.innerText?.trim()||'';
@@ -1193,13 +1224,14 @@ async function confirmarPresenca(treinamentoId){
         method : 'POST',
         headers: {'Content-Type':'application/json'},
         body   : JSON.stringify({
-          treinamento: t?.titulo   || '',
-          data       : t?.data     || new Date().toISOString().slice(0,10),
-          horario    : `${t?.horaInicio||''}–${t?.horaFim||''}`,
-          local      : t?.local    || '',
-          instrutor  : t?.instrutor|| '',
+          treinamentoId: treinamentoId,
+          treinamento  : t?.titulo   || '',
+          data         : t?.data     || new Date().toISOString().slice(0,10),
+          horario      : `${t?.horaInicio||''}–${t?.horaFim||''}`,
+          local        : t?.local    || '',
+          instrutor    : t?.instrutor|| '',
           nome, matricula:mat, email:email||'',
-          timestamp  : registradoEm
+          timestamp    : registradoEm
         })
       });
     } catch(e){
@@ -1466,6 +1498,16 @@ function viewConfig(){
       <button class="btn btn-yellow btn-sm btn-full" onclick="salvarConfig()">Salvar</button>
     </div>
 
+    <div class="card">
+      <div class="card-title">☁️ Fluxo 5 — Buscar Presenças do SharePoint</div>
+      <div class="fg">
+        <label class="fl">URL do Fluxo — Buscar Presenças</label>
+        <input id="cfg-busca" class="fc" type="text" value="${esc(c.buscaPresencaEndpoint||'')}" placeholder="https://...powerplatform.com/..."/>
+        <div style="font-size:.72rem;color:#aaa;margin-top:4px">Fluxo "Buscar Presenças — App G&D". Permite sincronizar presenças registradas em outros dispositivos.</div>
+      </div>
+      <button class="btn btn-yellow btn-sm btn-full" onclick="salvarConfig()">Salvar</button>
+    </div>
+
     <div style="text-align:center;margin-top:4px">
       <button class="btn btn-outline btn-sm" onclick="go('dashboard')">← Voltar</button>
     </div>
@@ -1473,10 +1515,11 @@ function viewConfig(){
 }
 
 function salvarConfig(){
-  const url     = document.getElementById('cfg-url')?.value.trim()    || cfg().presencaEndpoint || '';
-  const outlook = document.getElementById('cfg-outlook')?.value.trim() || cfg().outlookEndpoint  || '';
-  const notion  = document.getElementById('cfg-notion')?.value.trim()  || cfg().notionEndpoint   || '';
-  saveCfg({presencaEndpoint: url, outlookEndpoint: outlook, notionEndpoint: notion});
+  const url     = document.getElementById('cfg-url')?.value.trim()    || cfg().presencaEndpoint        || '';
+  const outlook = document.getElementById('cfg-outlook')?.value.trim() || cfg().outlookEndpoint         || '';
+  const notion  = document.getElementById('cfg-notion')?.value.trim()  || cfg().notionEndpoint          || '';
+  const busca   = document.getElementById('cfg-busca')?.value.trim()   || cfg().buscaPresencaEndpoint   || '';
+  saveCfg({presencaEndpoint: url, outlookEndpoint: outlook, notionEndpoint: notion, buscaPresencaEndpoint: busca});
   toast('Configurações salvas!');
   go('dashboard');
 }
