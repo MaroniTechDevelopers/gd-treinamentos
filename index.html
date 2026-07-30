@@ -905,9 +905,9 @@ function viewAta(id){
   };
   const _seen = new Set();
   const linhas = convidados.length>0 ? [
-    ...convidados.map((c,i)=>{ const p=_match(c); if(p)_seen.add(p.id); return {i:i+1,nome:c.nome||c.email,mat:p?.matricula||'—',presente:!!p,assin:p?.assinatura||null,extra:false}; }),
-    ...pres.filter(p=>!_seen.has(p.id)).map((p,j)=>({i:convidados.length+j+1,nome:p.nome,mat:p.matricula||'—',presente:true,assin:p.assinatura||null,extra:true}))
-  ] : pres.map((p,i)=>({i:i+1,nome:p.nome,mat:p.matricula||'—',presente:true,assin:p.assinatura||null,extra:false}));
+    ...convidados.map((c,i)=>{ const p=_match(c); if(p)_seen.add(p.id); return {i:i+1,nome:c.nome||c.email,mat:p?.matricula||'—',presente:!!p,assin:p?.assinatura||null,extra:false,presId:p?.id||null}; }),
+    ...pres.filter(p=>!_seen.has(p.id)).map((p,j)=>({i:convidados.length+j+1,nome:p.nome,mat:p.matricula||'—',presente:true,assin:p.assinatura||null,extra:true,presId:p.id}))
+  ] : pres.map((p,i)=>({i:i+1,nome:p.nome,mat:p.matricula||'—',presente:true,assin:p.assinatura||null,extra:false,presId:p.id}));
   const nPres = linhas.filter(l=>l.presente).length;
   const nAus  = linhas.filter(l=>!l.presente).length;
   const pct   = convidados.length>0 ? Math.round(nPres/convidados.length*100) : 100;
@@ -982,6 +982,7 @@ function viewAta(id){
                 <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:left">Nome do Colaborador</th>
                 ${convidados.length>0?'<th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:90px">Presença</th>':''}
                 <th style="padding:9px 10px;color:#f5c800;font-size:.68rem;letter-spacing:.05em;text-align:center;width:110px">Confirmação</th>
+                <th class="no-print" style="padding:9px 10px;width:36px"></th>
               </tr>
             </thead>
             <tbody>
@@ -989,7 +990,8 @@ function viewAta(id){
                 const bg=l.i%2===0?'background:#f9fafb':'background:#fff';
                 const statusCell=convidados.length>0?'<td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center">'+(l.presente?'<span style="color:#059669;font-weight:700;font-size:.75rem">✅ PRESENTE</span>':'<span style="color:#dc2626;font-weight:700;font-size:.75rem">❌ AUSENTE</span>')+'</td>':'';
                 const assinCell='<td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center">'+(l.assin?'<img style="width:88px;height:30px;object-fit:contain" src="'+l.assin+'"/>':'—')+'</td>';
-                return '<tr style="'+bg+(!l.presente?';opacity:.75':'')+'"><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center;color:#9ca3af;font-size:.75rem">'+l.i+'</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;color:#374151">'+esc(l.mat)+'</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827">'+esc(l.nome)+(l.extra?'&nbsp;<span style="font-size:.65rem;font-weight:400;color:#9ca3af">(não convidado)</span>':'')+'</td>'+statusCell+assinCell+'</tr>';
+                const delCell='<td class="no-print" style="padding:8px 6px;border-bottom:1px solid #f3f4f6;text-align:center">'+(l.presId?'<button onclick="removerPresencaAta(\''+l.presId+'\',\''+id+'\')" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:1rem;line-height:1;padding:2px 4px" title="Remover presença">✕</button>':'')+'</td>';
+                return '<tr style="'+bg+(!l.presente?';opacity:.75':'')+'"><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:center;color:#9ca3af;font-size:.75rem">'+l.i+'</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;color:#374151">'+esc(l.mat)+'</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;font-weight:600;color:#111827">'+esc(l.nome)+(l.extra?'&nbsp;<span style="font-size:.65rem;font-weight:400;color:#9ca3af">(não convidado)</span>':'')+'</td>'+statusCell+assinCell+delCell+'</tr>';
               }).join('')}
             </tbody>
           </table>`}
@@ -1410,6 +1412,12 @@ function removerPresenca(pid,tid){
   const d=db();
   d.presencas=d.presencas.filter(p=>p.id!==pid);
   saveDb(d); go('detalhe',tid); toast('Presença removida.');
+}
+
+function removerPresencaAta(pid,tid){
+  const d=db();
+  d.presencas=d.presencas.filter(p=>p.id!==pid);
+  saveDb(d); go('ata',tid); toast('Registro removido.');
 }
 
 function zoomAssin(pid){
