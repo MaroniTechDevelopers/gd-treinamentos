@@ -894,8 +894,15 @@ function viewAta(id){
   const ataSalva = d.atas.find(a=>a.treinamentoId===id);
   const pres = d.presencas.filter(p=>p.treinamentoId===id).sort((a,b)=>a.registradoEm.localeCompare(b.registradoEm));
   const convidados = t.convidados||[];
-  const _norm = s=>(s||'').toLowerCase().trim().replace(/\s+/g,' ');
-  const _match = c=>{ if(c.email){const m=pres.find(p=>p.email&&p.email.toLowerCase()===c.email.toLowerCase());if(m)return m;} return pres.find(p=>_norm(p.nome)===_norm(c.nome))||null; };
+  const _norm = s=>(s||'').toLowerCase().trim().replace(/\./g,' ').replace(/\s+/g,' ');
+  const _match = c=>{
+    if(c.email){const m=pres.find(p=>p.email&&p.email.toLowerCase()===c.email.toLowerCase());if(m)return m;}
+    const cn=_norm(c.nome);
+    const byName=pres.find(p=>_norm(p.nome)===cn);
+    if(byName)return byName;
+    if(c.email){const px=_norm(c.email.split('@')[0]);const byPfx=pres.find(p=>_norm(p.nome)===px);if(byPfx)return byPfx;}
+    return pres.find(p=>{ const pn=_norm(p.nome); const shorter=pn.length<cn.length?pn:cn; const longer=pn.length<cn.length?cn:pn; return shorter.split(' ').every(w=>w.length>2&&longer.includes(w)); })||null;
+  };
   const _seen = new Set();
   const linhas = convidados.length>0 ? [
     ...convidados.map((c,i)=>{ const p=_match(c); if(p)_seen.add(p.id); return {i:i+1,nome:c.nome||c.email,mat:p?.matricula||'—',presente:!!p,assin:p?.assinatura||null,extra:false}; }),
