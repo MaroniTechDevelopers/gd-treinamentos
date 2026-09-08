@@ -1280,7 +1280,12 @@ async function confirmarPresenca(treinamentoId){
   if(!document.getElementById('chk-presenca')?.checked){ show('ei-chk-presenca'); ok=false; }
   const chkTermo = document.getElementById('chk-termo');
   if(chkTermo && !chkTermo.checked){ show('ei-chk-termo'); ok=false; }
-  if(!ok) return;
+  if(!ok){
+    const primeiro = document.querySelector('.field-error.show');
+    if(primeiro){ primeiro.scrollIntoView({behavior:'smooth', block:'center'}); }
+    toast('⚠️ Preencha todos os campos obrigatórios e marque as declarações.');
+    return;
+  }
 
   const d = db();
   const dup = d.presencas.find(p=>p.treinamentoId===treinamentoId&&((p.matricula&&p.matricula===mat)||(p.email&&email&&p.email===email)));
