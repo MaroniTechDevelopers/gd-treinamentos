@@ -1106,7 +1106,7 @@ function viewInscricao(id){
   if(!t){
     const p = new URLSearchParams(location.search);
     const tt = p.get('tt');
-    if(tt) t = { id, titulo:tt, data:p.get('td')||'', horaInicio:p.get('thi')||'', horaFim:p.get('thf')||'', local:p.get('tl')||'', instrutor:p.get('ti')||'' };
+    if(tt) t = { id, titulo:tt, data:p.get('td')||'', horaInicio:p.get('thi')||'', horaFim:p.get('thf')||'', local:p.get('tl')||'', instrutor:p.get('ti')||'', termo:p.get('term')||'' };
   }
   if(!t){
     document.getElementById('root').innerHTML = `
@@ -1356,6 +1356,7 @@ function buildUrl(treinamentoId){
     if(t.horaFim)    p.set('thf', t.horaFim);
     if(t.local)      p.set('tl', t.local);
     if(t.instrutor)  p.set('ti', t.instrutor);
+    if(t.termo)      p.set('term', t.termo);
   }
   return `${base}?${p.toString()}`;
 }
