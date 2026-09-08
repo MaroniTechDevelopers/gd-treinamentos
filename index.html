@@ -711,6 +711,11 @@ function viewForm(id){
         <textarea id="f-convidados" class="fc" rows="4" placeholder="João Silva&#10;maria@transmaroni.com.br&#10;Pedro Santos - pedro@transmaroni.com.br">${convidadosTexto}</textarea>
         <div style="font-size:.72rem;color:#aaa;margin-top:3px">Convidados do invite do Outlook. Serão comparados com a lista de presença na ATA.</div>
       </div>
+      <div class="fg">
+        <label class="fl">📋 Declaração de Compromisso <span style="font-weight:400;color:#9ca3af;font-size:.8rem">(opcional — exibida ao participante para aceite obrigatório)</span></label>
+        <textarea id="f-termo" class="fc" rows="3" placeholder="Ex: Declaro que me comprometo a utilizar as ferramentas de Inteligência Artificial exclusivamente para fins profissionais e éticos, conforme as diretrizes da empresa.">${esc(t?.termo||'')}</textarea>
+        <div style="font-size:.72rem;color:#aaa;margin-top:3px">Se preenchido, o participante verá esta declaração e deverá marcar que leu e concorda antes de confirmar presença.</div>
+      </div>
       <div style="display:flex;gap:10px;margin-top:6px">
         <button class="btn btn-outline" onclick="go('dashboard')">Cancelar</button>
         <button class="btn btn-yellow" style="flex:1" onclick="salvarTreinamento(${id?`'${id}'`:'null'})">${id?'Salvar':'Criar Treinamento'}</button>
@@ -743,6 +748,7 @@ async function salvarTreinamento(id){
     instrutor:  document.getElementById('f-instrutor').value.trim(),
     descricao:  document.getElementById('f-descricao').value.trim(),
     notionUrl:  document.getElementById('f-notion').value.trim(),
+    termo:      document.getElementById('f-termo').value.trim(),
     convidados
   };
   if(id){
@@ -1170,6 +1176,26 @@ function viewInscricao(id){
           <button class="btn-clear" onclick="limparSig()">Limpar assinatura</button>
           <div class="field-error" id="ei-sig">Por favor, assine.</div>
         </div>
+
+        <div class="fg" style="margin-top:6px;padding:12px 14px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.84rem;line-height:1.5;color:#374151">
+            <input type="checkbox" id="chk-presenca" style="margin-top:3px;accent-color:#f5c800;width:16px;height:16px;flex-shrink:0"/>
+            <span>Declaro que <strong>compareci presencialmente</strong> ao treinamento <strong>"${esc(t?.titulo||'')}"</strong> na data de <strong>${fmtData(t?.data||'')}</strong>.</span>
+          </label>
+          <div class="field-error" id="ei-chk-presenca">Você precisa confirmar sua presença marcando esta declaração.</div>
+        </div>
+
+        ${t?.termo ? `
+        <div class="fg" style="margin-top:6px;background:#fefce8;border:1.5px solid #fde68a;border-radius:10px;padding:12px 14px">
+          <div style="font-size:.68rem;font-weight:800;color:#92400e;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px">📋 Declaração de Compromisso</div>
+          <p style="font-size:.83rem;color:#374151;line-height:1.55;margin-bottom:12px">${esc(t.termo)}</p>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:.84rem;line-height:1.5;color:#374151">
+            <input type="checkbox" id="chk-termo" style="margin-top:3px;accent-color:#f5c800;width:16px;height:16px;flex-shrink:0"/>
+            <span>Li e estou ciente desta declaração de compromisso.</span>
+          </label>
+          <div class="field-error" id="ei-chk-termo">Você precisa aceitar a declaração de compromisso.</div>
+        </div>` : ''}
+
         <button class="btn btn-yellow btn-full btn-lg" id="btn-confirmar" onclick="confirmarPresenca('${id}')">
           ✅ Confirmar Presença
         </button>
@@ -1251,6 +1277,9 @@ async function confirmarPresenca(treinamentoId){
   if(!mat)   { show('ei-mat');  err('i-mat');  ok=false; }
   if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ show('ei-email'); err('i-email'); ok=false; }
   if(!_sigHasData){ show('ei-sig'); ok=false; }
+  if(!document.getElementById('chk-presenca')?.checked){ show('ei-chk-presenca'); ok=false; }
+  const chkTermo = document.getElementById('chk-termo');
+  if(chkTermo && !chkTermo.checked){ show('ei-chk-termo'); ok=false; }
   if(!ok) return;
 
   const d = db();
@@ -1265,8 +1294,10 @@ async function confirmarPresenca(treinamentoId){
   const registradoEm = new Date().toISOString();
   const t            = d.treinamentos.find(t=>t.id===treinamentoId);
 
+  const aceitouTermo = !!document.getElementById('chk-termo')?.checked;
+
   // 1. Salva no localStorage (sempre funciona, inclusive offline)
-  d.presencas.push({id:uid(), treinamentoId, nome, matricula:mat, email:email||'', assinatura:assin, registradoEm});
+  d.presencas.push({id:uid(), treinamentoId, nome, matricula:mat, email:email||'', assinatura:assin, registradoEm, confirmouPresenca:true, aceitouTermo});
   saveDb(d);
 
   // 2. Envia para o Power Automate → SharePoint (se configurado)
@@ -1284,7 +1315,9 @@ async function confirmarPresenca(treinamentoId){
           local        : t?.local    || '',
           instrutor    : t?.instrutor|| '',
           nome, matricula:mat, email:email||'',
-          timestamp    : registradoEm
+          timestamp        : registradoEm,
+          confirmouPresenca: true,
+          aceitouTermo     : aceitouTermo
         })
       });
     } catch(e){
