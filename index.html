@@ -370,6 +370,9 @@ function loginComo(id){
       <label class="fl">Senha</label>
       <input id="m-senha-login" class="fc" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')confirmarSenha('${id}')"/>
     </div>
+    <div style="text-align:right;margin-top:2px;margin-bottom:4px">
+      <button onclick="esqueciSenha('${id}')" style="background:none;border:none;color:#f5c800;font-size:.75rem;cursor:pointer;padding:2px 0;font-family:inherit;font-weight:600">Esqueci minha senha</button>
+    </div>
     <div class="m-foot">
       <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-yellow btn-sm" onclick="confirmarSenha('${id}')">Entrar</button>
@@ -384,6 +387,34 @@ function confirmarSenha(id){
   if(!g || senha !== g.senha){ toast('Senha incorreta.'); return; }
   _aplicarRole(g, d);
   closeModal(); S.gestorId=id; go('dashboard');
+}
+
+function esqueciSenha(id){
+  closeModal();
+  const d=db(); const g=d.gestores.find(g=>g.id===id);
+  if(!g) return;
+  modal(`<h3>🔑 Redefinir Senha</h3>
+    <p style="font-size:.82rem;color:#6b7280;margin-top:4px;margin-bottom:12px">Confirme o e-mail cadastrado no seu perfil para liberar o acesso sem senha.</p>
+    <div class="fg">
+      <label class="fl">E-mail cadastrado</label>
+      <input id="m-email-reset" class="fc" type="email" placeholder="nome@transmaroni.com.br" onkeydown="if(event.key==='Enter')confirmarReset('${id}')"/>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-yellow btn-sm" onclick="confirmarReset('${id}')">Confirmar</button>
+    </div>`);
+  setTimeout(()=>{ const el=document.getElementById('m-email-reset'); if(el) el.focus(); },120);
+}
+
+function confirmarReset(id){
+  const d=db(); const g=d.gestores.find(g=>g.id===id);
+  const email=(document.getElementById('m-email-reset')?.value||'').trim().toLowerCase();
+  if(!g||!email||email!==(g.email||'').toLowerCase()){ toast('❌ E-mail não confere com o cadastro.'); return; }
+  g.senha='';
+  saveDb(d);
+  closeModal();
+  toast('✅ Senha removida. Faça login normalmente — na próxima vez defina uma nova senha em Configurações.');
+  render();
 }
 
 function excluirPerfil(id){
@@ -430,7 +461,49 @@ function userMgmtSection(me, d){
       ${lista.length===0
         ? '<p style="padding:14px;color:#9ca3af;font-size:.85rem">Nenhum usuário cadastrado.</p>'
         : rows}
+      <div style="display:flex;gap:8px;padding:12px 14px;border-top:1px solid #f3f4f6;background:#fafafa">
+        <button class="btn btn-outline btn-sm" style="font-size:.72rem;gap:5px" onclick="exportarUsuarios()">📤 Exportar usuários</button>
+        <button class="btn btn-outline btn-sm" style="font-size:.72rem;gap:5px" onclick="importarUsuarios()">📥 Importar de outro dispositivo</button>
+      </div>
     </div>`;
+}
+
+function exportarUsuarios(){
+  const dados = JSON.stringify({gestores: db().gestores}, null, 2);
+  modal(`<h3>📤 Exportar Usuários</h3>
+    <p style="font-size:.82rem;color:#6b7280;margin-top:4px;margin-bottom:10px">Copie o código abaixo e envie para o administrador (WhatsApp, e-mail, etc.).</p>
+    <textarea class="fc" rows="9" readonly onclick="this.select()" style="font-size:.68rem;font-family:monospace;resize:none">${esc(dados)}</textarea>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Fechar</button>
+      <button class="btn btn-yellow btn-sm" onclick="navigator.clipboard?.writeText(${JSON.stringify(dados)}).then(()=>toast('✅ Copiado!')).catch(()=>toast('Selecione o texto e copie manualmente.'))">📋 Copiar</button>
+    </div>`);
+}
+
+function importarUsuarios(){
+  modal(`<h3>📥 Importar Usuários</h3>
+    <p style="font-size:.82rem;color:#6b7280;margin-top:4px;margin-bottom:10px">Cole o código exportado do dispositivo do colega. Usuários com o mesmo e-mail não serão duplicados.</p>
+    <textarea id="m-import-json" class="fc" rows="9" style="font-size:.68rem;font-family:monospace;resize:none" placeholder='{"gestores":[...]}'></textarea>
+    <div class="m-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-yellow btn-sm" onclick="confirmarImportacao()">Importar</button>
+    </div>`);
+  setTimeout(()=>document.getElementById('m-import-json')?.focus(),120);
+}
+
+function confirmarImportacao(){
+  try{
+    const json=JSON.parse(document.getElementById('m-import-json')?.value||'');
+    const novos=json.gestores||[];
+    if(!novos.length){ toast('Nenhum usuário encontrado no código.'); return; }
+    const d=db(); let added=0;
+    novos.forEach(ng=>{
+      const jaExiste=d.gestores.some(g=>g.email&&ng.email&&g.email.toLowerCase()===ng.email.toLowerCase());
+      if(!jaExiste){ d.gestores.push(ng); added++; }
+    });
+    saveDb(d); closeModal();
+    toast('✅ '+added+' usuário(s) importado(s).');
+    render();
+  }catch(e){ toast('❌ Código inválido. Verifique se copiou tudo corretamente.'); }
 }
 
 // ════════════════════════════════════════
