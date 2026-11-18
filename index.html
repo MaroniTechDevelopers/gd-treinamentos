@@ -1231,9 +1231,9 @@ function viewInscricao(id){
           <div class="field-error" id="ei-nome">Informe seu nome.</div>
         </div>
         <div class="fg">
-          <label class="fl">Matrícula *</label>
-          <input id="i-mat" class="fc" type="text" placeholder="Ex: 12345" inputmode="numeric"/>
-          <div class="field-error" id="ei-mat">Informe sua matrícula.</div>
+          <label class="fl">Matrícula ou CPF</label>
+          <input id="i-mat" class="fc" type="text" placeholder="Ex: 12345 ou 123.456.789-00"/>
+          <div class="field-error" id="ei-mat">Informe sua matrícula ou CPF.</div>
         </div>
         <div class="fg">
           <label class="fl">E-mail corporativo</label>
@@ -1347,7 +1347,6 @@ async function confirmarPresenca(treinamentoId){
   document.querySelectorAll('.fc-err').forEach(e=>e.classList.remove('fc-err'));
 
   if(!nome)  { show('ei-nome'); err('i-nome'); ok=false; }
-  if(!mat)   { show('ei-mat');  err('i-mat');  ok=false; }
   if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ show('ei-email'); err('i-email'); ok=false; }
   if(!_sigHasData){ show('ei-sig'); ok=false; }
   if(!document.getElementById('chk-presenca')?.checked){ show('ei-chk-presenca'); ok=false; }
