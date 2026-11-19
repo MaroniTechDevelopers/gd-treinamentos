@@ -232,7 +232,19 @@ function db(){
 }
 function dbEnsure(d){ if(!d.atas) d.atas=[]; return d; }
 
-function saveDb(d){ localStorage.setItem(DB_KEY, JSON.stringify(d)); }
+function saveDb(d){
+  const json=JSON.stringify(d);
+  try{ localStorage.setItem(DB_KEY,json); }
+  catch(e){
+    if(e.name==='QuotaExceededError'||e.code===22||e.name==='NS_ERROR_DOM_QUOTA_REACHED'){
+      // localStorage cheio (assinaturas base64 consomem muito espaço)
+      // Mantém os dados mas remove assinaturas locais (já salvas no SharePoint)
+      const dLight={...d,presencas:d.presencas.map(p=>({...p,assinatura:p.assinatura?'[no-sharepoint]':null}))};
+      try{ localStorage.setItem(DB_KEY,JSON.stringify(dLight)); console.warn('saveDb: quota excedida, assinaturas removidas localmente'); }
+      catch(e2){ console.error('saveDb: localStorage cheio mesmo sem assinaturas',e2); }
+    }
+  }
+}
 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).substr(2,6); }
 
@@ -562,7 +574,10 @@ function viewDashboard(){
       </div>
       <div class="sec-hdr">
         <h2>Meus Treinamentos</h2>
-        <button class="btn btn-yellow btn-sm" onclick="go('novo')">+ Novo</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-dark btn-sm" onclick="sincronizarTodasPresencas()" title="Buscar presenças de todos os treinamentos no SharePoint">☁️ Sincronizar Todas</button>
+          <button class="btn btn-yellow btn-sm" onclick="go('novo')">+ Novo</button>
+        </div>
       </div>
       ${meus.length===0
         ? `<div class="empty" style="padding:20px 0"><div class="empty-ico" style="font-size:1.8rem">📋</div><h3>Nenhum treinamento criado</h3><p>Clique em "+ Novo" para criar o primeiro.</p></div>`
@@ -629,7 +644,10 @@ function viewDashboard(){
     </div>
     <div class="sec-hdr">
       <h2>Meus Treinamentos</h2>
-      <button class="btn btn-yellow btn-sm" onclick="go('novo')">+ Novo</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-dark btn-sm" onclick="sincronizarTodasPresencas()" title="Buscar presenças de todos os treinamentos no SharePoint">☁️ Sincronizar Todas</button>
+        <button class="btn btn-yellow btn-sm" onclick="go('novo')">+ Novo</button>
+      </div>
     </div>
     ${meus.length===0 ? `
       <div class="empty">
@@ -1155,6 +1173,40 @@ async function sincronizarPresencas(treinamentoId){
   } catch(e){
     toast('❌ Erro ao sincronizar: '+(e.message||'sem conexão'));
   }
+}
+
+async function sincronizarTodasPresencas(){
+  const ep = cfg().buscaPresencaEndpoint;
+  if(!ep){ toast('⚠️ Configure a URL do Fluxo 5 em ⚙️ Configurações.'); return; }
+  const d = db();
+  const ids = d.treinamentos.map(t=>t.id);
+  if(!ids.length){ toast('Nenhum treinamento cadastrado.'); return; }
+  toast('⏳ Sincronizando todos os '+ids.length+' treinamento(s)...');
+  let totalNovos=0, totalPres=0, erros=0;
+  for(const treinamentoId of ids){
+    try{
+      const r = await fetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({treinamentoId}) });
+      if(!r.ok){ erros++; continue; }
+      const data = await r.json();
+      const lista = data.presencas||[];
+      totalPres+=lista.length;
+      const d2 = db();
+      lista.forEach(p=>{
+        const jaExiste = d2.presencas.some(lp=>
+          lp.treinamentoId===treinamentoId &&
+          (lp.nome&&lp.nome.toLowerCase()===p.nome.toLowerCase())
+        );
+        if(!jaExiste){
+          d2.presencas.push({ id:uid(), treinamentoId, nome:p.nome||'', matricula:p.matricula||'', email:p.email||'', assinatura:null, registradoEm:p.timestamp||new Date().toISOString() });
+          totalNovos++;
+        }
+      });
+      saveDb(d2);
+    } catch(e){ erros++; }
+  }
+  const msg = erros ? `✅ ${totalNovos} novas · ${totalPres} no SP · ⚠️ ${erros} falha(s)` : `✅ ${totalNovos} novas importadas · ${totalPres} presenças no SharePoint`;
+  toast(msg);
+  render();
 }
 
 function salvarAta(treinamentoId){
